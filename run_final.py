@@ -1,7 +1,9 @@
+import metrics
 import os
 
+from algorithm import CCR
+from cv import ResamplingCV
 from utils import evaluate, compare
-from sklearn.metrics import roc_auc_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
@@ -10,8 +12,6 @@ from sklearn.ensemble import BaggingClassifier
 from imblearn.over_sampling import SMOTE, ADASYN, BorderlineSMOTE
 from imblearn.under_sampling import NeighbourhoodCleaningRule
 from imblearn.combine import SMOTETomek, SMOTEENN
-from algorithm import CCRSelection
-
 
 if __name__ == '__main__':
     classifiers = {
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         evaluate(NeighbourhoodCleaningRule(), classifier, '%s_ncr.csv' % name, eval_type='final')
         evaluate(SMOTETomek(), classifier, '%s_t-link.csv' % name, eval_type='final')
         evaluate(SMOTEENN(), classifier, '%s_enn.csv' % name, eval_type='final')
-        evaluate(CCRSelection(energies=energies, classifier=classifier, measure=roc_auc_score),
+        evaluate(ResamplingCV(CCR, classifier, energies=energies, metrics=(metrics.auc,)),
                  classifier, '%s_ccr.csv' % name, eval_type='final')
 
         summary, tables = compare(['%s_base.csv' % name, '%s_adasyn.csv' % name, '%s_smote.csv' % name,
