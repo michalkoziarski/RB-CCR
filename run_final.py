@@ -7,6 +7,7 @@ from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import ADASYN, BorderlineSMOTE, SMOTE
 from imblearn.under_sampling import NeighbourhoodCleaningRule
 from sklearn.ensemble import BaggingClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
@@ -20,6 +21,7 @@ if __name__ == '__main__':
         'cart': DecisionTreeClassifier(),
         'knn': KNeighborsClassifier(),
         'svm': LinearSVC(),
+        'lr': LogisticRegression(),
         'nb': GaussianNB(),
         'mlp': MLPClassifier(),
         'cart-bag': BaggingClassifier(DecisionTreeClassifier()),
