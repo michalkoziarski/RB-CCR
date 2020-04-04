@@ -38,7 +38,7 @@ if __name__ == '__main__':
         evaluate(NeighbourhoodCleaningRule(), classifier, '%s_ncr.csv' % name, eval_type='final')
         evaluate(SMOTETomek(), classifier, '%s_t-link.csv' % name, eval_type='final')
         evaluate(SMOTEENN(), classifier, '%s_enn.csv' % name, eval_type='final')
-        evaluate(ResamplingCV(CCR, classifier, energies=energies, metrics=(metrics.auc,)),
+        evaluate(ResamplingCV(CCR, classifier, energy=energies, metrics=(metrics.auc,)),
                  classifier, '%s_ccr.csv' % name, eval_type='final')
 
         summary, tables = compare(['%s_base.csv' % name, '%s_adasyn.csv' % name, '%s_smote.csv' % name,
