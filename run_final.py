@@ -3,24 +3,27 @@ import os
 
 from algorithm import CCR
 from cv import ResamplingCV
-from utils import evaluate, compare
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import BaggingClassifier
-from imblearn.over_sampling import SMOTE, ADASYN, BorderlineSMOTE
+from imblearn.combine import SMOTEENN, SMOTETomek
+from imblearn.over_sampling import ADASYN, BorderlineSMOTE, SMOTE
 from imblearn.under_sampling import NeighbourhoodCleaningRule
-from imblearn.combine import SMOTETomek, SMOTEENN
+from sklearn.ensemble import BaggingClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from utils import evaluate, compare
+
 
 if __name__ == '__main__':
     classifiers = {
         'cart': DecisionTreeClassifier(),
-        'cart-bag': BaggingClassifier(DecisionTreeClassifier()),
         'knn': KNeighborsClassifier(),
-        'knn-bag': BaggingClassifier(KNeighborsClassifier()),
         'svm': LinearSVC(),
-        'nb': GaussianNB()
+        'nb': GaussianNB(),
+        'mlp': MLPClassifier(),
+        'cart-bag': BaggingClassifier(DecisionTreeClassifier()),
+        'knn-bag': BaggingClassifier(KNeighborsClassifier())
     }
 
     energies = [0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
