@@ -58,7 +58,7 @@ def compare(output_files):
         path = os.path.join(os.path.dirname(__file__), 'results', f)
         dfs[f] = pd.read_csv(path)
 
-    datasets = list(dfs.values())[0]['dataset'].unique()
+    dataset_names = list(dfs.values())[0]['dataset'].unique()
     measures = ['precision', 'recall', 'f-measure', 'g-mean', 'auc']
 
     for measure in measures:
@@ -66,7 +66,7 @@ def compare(output_files):
         summary[measure] = {}
         tables[measure] = []
 
-        for dataset in datasets:
+        for dataset in dataset_names:
             results[measure][dataset] = {}
             row = [dataset]
 
@@ -84,7 +84,7 @@ def compare(output_files):
         tables[measure] = pd.DataFrame(tables[measure], columns=['dataset'] + output_files)
 
     for measure in measures:
-        for dataset in datasets:
+        for dataset in dataset_names:
             best_method = max(results[measure][dataset], key=results[measure][dataset].get)
             summary[measure][best_method] += 1
 
