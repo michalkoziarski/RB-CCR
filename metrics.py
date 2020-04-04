@@ -16,17 +16,17 @@ def metric_decorator(metric_function):
 
 @metric_decorator
 def precision(ground_truth, predictions, minority_class=None):
-    return sklearn.metrics.precision_score(ground_truth, predictions, pos_label=minority_class)
+    return sklearn.metrics.precision_score(ground_truth, predictions, pos_label=minority_class, zero_division=0)
 
 
 @metric_decorator
 def recall(ground_truth, predictions, minority_class=None):
-    return sklearn.metrics.recall_score(ground_truth, predictions, pos_label=minority_class)
+    return sklearn.metrics.recall_score(ground_truth, predictions, pos_label=minority_class, zero_division=0)
 
 
 @metric_decorator
 def f_measure(ground_truth, predictions, minority_class=None):
-    return sklearn.metrics.f1_score(ground_truth, predictions, pos_label=minority_class)
+    return sklearn.metrics.f1_score(ground_truth, predictions, pos_label=minority_class, zero_division=0)
 
 
 def g_mean(ground_truth, predictions):
