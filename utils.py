@@ -16,7 +16,7 @@ def evaluate(method, classifier, output_file, eval_type=None):
     aucs = []
     g_means = []
 
-    for name, folds in tqdm(datasets.load_all(eval_type).items()):
+    for name, folds in tqdm(datasets.load_all(eval_type).items(), desc=output_file):
         for i in range(len(folds)):
             (X_train, y_train), (X_test, y_test) = folds[i]
 
