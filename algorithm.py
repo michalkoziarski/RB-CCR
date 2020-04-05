@@ -12,9 +12,27 @@ def sample_inside_sphere(dimensionality, radius, p_norm=1):
     return direction_unit_vector * np.random.rand() * radius
 
 
+def rbf(d, gamma):
+    if gamma == 0.0:
+        return 0.0
+    else:
+        return np.exp(-(d / gamma) ** 2)
+
+
+def rbf_score(point, majority_points, gamma, p_norm=1):
+    result = 0.0
+
+    for majority_point in majority_points:
+        result += rbf(distance(point, majority_point, p_norm), gamma)
+
+    return result
+
+
 class CCR:
-    def __init__(self, energy, p_norm=1, n=None):
+    def __init__(self, energy, gamma=None, max_attempts=10, p_norm=1, n=None):
         self.energy = energy
+        self.gamma = gamma
+        self.max_attempts = max_attempts
         self.p_norm = p_norm
         self.n = n
 
@@ -42,7 +60,6 @@ class CCR:
         radii = np.zeros(len(minority_points))
 
         translations = np.zeros(majority_points.shape)
-        kept_indices = np.full(len(majority_points), True)
 
         for i in range(len(minority_points)):
             minority_point = minority_points[i]
@@ -93,10 +110,6 @@ class CCR:
                 translation = (radius - d) / d * (majority_point - minority_point)
                 translations[sorted_distances[j]] += translation
 
-                kept_indices[sorted_distances[j]] = False
-
-        majority_points += translations
-
         appended = []
 
         for i in range(len(minority_points)):
@@ -104,8 +117,29 @@ class CCR:
             n_synthetic_samples = int(np.round(1.0 / (radii[i] * np.sum(1.0 / radii)) * n))
             r = radii[i]
 
-            for _ in range(n_synthetic_samples):
-                appended.append(minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm))
+            if self.gamma is None:
+                for _ in range(n_synthetic_samples):
+                    appended.append(minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm))
+            else:
+                seed_score = rbf_score(minority_point, majority_points, self.gamma)
+
+                for _ in range(n_synthetic_samples):
+                    attempt = 0
+
+                    while attempt < self.max_attempts:
+                        sample = minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm)
+                        sample_score = rbf_score(sample, majority_points, self.gamma)
+
+                        if sample_score <= seed_score:
+                            appended.append(sample)
+
+                            break
+
+                        attempt += 1
+                    else:
+                        appended.append(minority_point)
+
+        majority_points += translations
 
         if len(appended) > 0:
             points = np.concatenate([majority_points, minority_points, appended])

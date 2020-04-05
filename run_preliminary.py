@@ -6,10 +6,12 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import metrics
 
 from utils import evaluate, compare
 from sklearn.tree import DecisionTreeClassifier
 from algorithm import CCR
+from cv import ResamplingCV
 
 
 if __name__ == '__main__':
@@ -19,11 +21,14 @@ if __name__ == '__main__':
         os.mkdir(results_path)
 
     comparable = []
-    energies = [0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
+    energies = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 50.0, 100.0]
+    gammas = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0]
 
-    for energy in energies:
-        file_name = 'preliminary_cart_energy_%s.csv' % energy
-        evaluate(CCR(energy=energy), DecisionTreeClassifier(), file_name, eval_type='preliminary')
+    for gamma in gammas:
+        file_name = 'preliminary_cart_gamma_%s.csv' % gamma
+        classifier = DecisionTreeClassifier()
+        evaluate(ResamplingCV(CCR, classifier, energy=energies, gamma=[gamma], metrics=(metrics.auc,)),
+                 classifier, file_name, eval_type='preliminary')
         comparable.append(file_name)
 
     summary, tables = compare(comparable)
@@ -33,14 +38,14 @@ if __name__ == '__main__':
         data = []
 
         for dataset in table['dataset'].unique():
-            for energy in energies:
-                value = float(table[table['dataset'] == dataset]['preliminary_cart_energy_%s.csv' % energy])
-                data.append([dataset.replace('-', '').replace('_', ''), energy, value])
+            for gamma in gammas:
+                value = float(table[table['dataset'] == dataset]['preliminary_cart_gamma_%s.csv' % gamma])
+                data.append([dataset.replace('-', '').replace('_', ''), gamma, value])
 
-        df = pd.DataFrame(data, columns=['dataset', 'energy', 'value'])
+        df = pd.DataFrame(data, columns=['dataset', 'gamma', 'value'])
 
         grid = sns.FacetGrid(df, col='dataset', col_wrap=5)
-        grid.set(ylim=(0.0, 1.0), xticks=range(len(energies)))
-        grid.set_xticklabels(energies, rotation=90)
+        grid.set(ylim=(0.0, 1.0), xticks=range(len(gammas)))
+        grid.set_xticklabels(gammas, rotation=90)
         grid.map(plt.plot, 'value')
         grid.savefig(os.path.join(results_path, 'preliminary_%s.pdf' % measure))
