@@ -175,3 +175,7 @@ def load_all(eval_type=None):
         datasets[name] = load(name, url)
 
     return datasets
+
+
+if __name__ == '__main__':
+    load_all()
