@@ -16,16 +16,19 @@ from sklearn.tree import DecisionTreeClassifier
 from utils import evaluate, compare
 
 
+RANDOM_STATE = 42
+
+
 if __name__ == '__main__':
     classifiers = {
-        'cart': DecisionTreeClassifier(),
+        'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
         'knn': KNeighborsClassifier(),
-        'svm': LinearSVC(),
-        'lr': LogisticRegression(),
+        'svm': LinearSVC(random_state=RANDOM_STATE),
+        'lr': LogisticRegression(random_state=RANDOM_STATE),
         'nb': GaussianNB(),
-        'mlp': MLPClassifier(),
-        'cart-bag': BaggingClassifier(DecisionTreeClassifier()),
-        'knn-bag': BaggingClassifier(KNeighborsClassifier())
+        'mlp': MLPClassifier(random_state=RANDOM_STATE),
+        'cart-bag': BaggingClassifier(DecisionTreeClassifier(random_state=RANDOM_STATE), random_state=RANDOM_STATE),
+        'knn-bag': BaggingClassifier(KNeighborsClassifier(), random_state=RANDOM_STATE)
     }
 
     energies = [0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
@@ -38,16 +41,16 @@ if __name__ == '__main__':
 
     for name, classifier in classifiers.items():
         evaluate(None, classifier, '%s_base.csv' % name, eval_type='final')
-        evaluate(ADASYN(), classifier, '%s_adasyn.csv' % name, eval_type='final')
-        evaluate(SMOTE(), classifier, '%s_smote.csv' % name, eval_type='final')
-        evaluate(BorderlineSMOTE(), classifier, '%s_borderline.csv' % name, eval_type='final')
+        evaluate(ADASYN(random_state=RANDOM_STATE), classifier, '%s_adasyn.csv' % name, eval_type='final')
+        evaluate(SMOTE(random_state=RANDOM_STATE), classifier, '%s_smote.csv' % name, eval_type='final')
+        evaluate(BorderlineSMOTE(random_state=RANDOM_STATE), classifier, '%s_borderline.csv' % name, eval_type='final')
         evaluate(NeighbourhoodCleaningRule(), classifier, '%s_ncr.csv' % name, eval_type='final')
-        evaluate(SMOTETomek(), classifier, '%s_t-link.csv' % name, eval_type='final')
-        evaluate(SMOTEENN(), classifier, '%s_enn.csv' % name, eval_type='final')
-        evaluate(ResamplingCV(CCR, classifier, energy=energies, metrics=(metrics.auc,)),
+        evaluate(SMOTETomek(random_state=RANDOM_STATE), classifier, '%s_t-link.csv' % name, eval_type='final')
+        evaluate(SMOTEENN(random_state=RANDOM_STATE), classifier, '%s_enn.csv' % name, eval_type='final')
+        evaluate(ResamplingCV(CCR, classifier, energy=energies, random_state=[RANDOM_STATE], metrics=(metrics.auc,)),
                  classifier, '%s_ccr.csv' % name, eval_type='final')
-        evaluate(ResamplingCV(CCR, classifier, energy=energies, gamma=gammas, metrics=(metrics.auc,)),
-                 classifier, '%s_rb-ccr.csv' % name, eval_type='final')
+        evaluate(ResamplingCV(CCR, classifier, energy=energies, random_state=[RANDOM_STATE], gamma=gammas,
+                 metrics=(metrics.auc,)), classifier, '%s_rb-ccr.csv' % name, eval_type='final')
 
         summary, tables = compare(['%s_base.csv' % name, '%s_adasyn.csv' % name, '%s_smote.csv' % name,
                                    '%s_borderline.csv' % name, '%s_ncr.csv' % name, '%s_t-link.csv' % name,

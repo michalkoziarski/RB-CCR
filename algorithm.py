@@ -29,14 +29,17 @@ def rbf_score(point, majority_points, gamma, p_norm=1):
 
 
 class CCR:
-    def __init__(self, energy, gamma=None, max_attempts=10, p_norm=1, n=None):
+    def __init__(self, energy, gamma=None, max_attempts=10, p_norm=1, n=None, random_state=None):
         self.energy = energy
         self.gamma = gamma
         self.max_attempts = max_attempts
         self.p_norm = p_norm
         self.n = n
+        self.random_state = random_state
 
     def fit_sample(self, X, y):
+        np.random.seed(self.random_state)
+
         classes = np.unique(y)
         sizes = [sum(y == c) for c in classes]
         minority_class = classes[np.argmin(sizes)]
