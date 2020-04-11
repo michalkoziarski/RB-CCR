@@ -7,12 +7,12 @@ from sklearn.model_selection import StratifiedKFold
 
 
 class ResamplingCV:
-    def __init__(self, algorithm, classifier, metrics=(f_measure, g_mean, auc), n=3, random_state=None, **kwargs):
+    def __init__(self, algorithm, classifier, metrics=(f_measure, g_mean, auc), n=3, seed=None, **kwargs):
         self.algorithm = algorithm
         self.classifier = classifier
         self.metrics = metrics
         self.n = n
-        self.random_state = random_state
+        self.seed = seed
         self.kwargs = kwargs
 
     def fit_sample(self, X, y):
@@ -28,13 +28,13 @@ class ResamplingCV:
             scores = []
 
             for i in range(self.n):
-                skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=self.random_state + i)
+                skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=self.seed + i)
 
                 for train_idx, test_idx in skf.split(X, y):
                     try:
                         X_train, y_train = self.algorithm(**parameters).fit_sample(X[train_idx], y[train_idx])
-                    except ValueError as e:
-                        logging.warning('ValueError "%s" occurred during CV resampling with %s. '
+                    except (ValueError, RuntimeError) as e:
+                        logging.warning('Error "%s" occurred during CV resampling with %s. '
                                         'Setting parameter score to -inf.' % (e, self.algorithm.__name__))
 
                         scores.append(-np.inf)
