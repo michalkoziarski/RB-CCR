@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import pickle
 
+from collections import Counter
+from imblearn.under_sampling import RandomUnderSampler
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
@@ -67,7 +69,7 @@ def partition(X, y):
     return partitions
 
 
-def load(name, url=None, encode_features=True, remove_metadata=True, scale=True):
+def load(name, url=None, encode_features=True, remove_metadata=True, scale=True, minority_training_size=None):
     file_name = '%s.dat' % name
 
     if url is not None:
@@ -107,7 +109,28 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True)
     for i in range(5):
         for j in range(2):
             train_idx, test_idx = partitions[i][j]
-            train_set = [X[train_idx], y[train_idx]]
+
+            if minority_training_size is None:
+                train_set = [X[train_idx], y[train_idx]]
+            else:
+                X_train, y_train = X[train_idx], y[train_idx]
+
+                minority_class = Counter(y).most_common()[1][0]
+                majority_class = Counter(y).most_common()[0][0]
+
+                n_minority = Counter(y_train).most_common()[1][1]
+                n_majority = Counter(y_train).most_common()[0][1]
+
+                X_train, y_train = RandomUnderSampler(
+                    sampling_strategy={
+                        minority_class: np.min([n_minority, minority_training_size]),
+                        majority_class: n_majority
+                    },
+                    random_state=RANDOM_SEED,
+                ).fit_sample(X_train, y_train)
+
+                train_set = [X_train, y_train]
+
             test_set = [X[test_idx], y[test_idx]]
             folds.append([train_set, test_set])
 
