@@ -7,11 +7,12 @@ from sklearn.model_selection import StratifiedKFold
 
 
 class ResamplingCV:
-    def __init__(self, algorithm, classifier, metrics=(f_measure, g_mean, auc), n=3, **kwargs):
+    def __init__(self, algorithm, classifier, metrics=(f_measure, g_mean, auc), n=3, random_state=None, **kwargs):
         self.algorithm = algorithm
         self.classifier = classifier
         self.metrics = metrics
         self.n = n
+        self.random_state = random_state
         self.kwargs = kwargs
 
     def fit_sample(self, X, y):
@@ -26,8 +27,8 @@ class ResamplingCV:
         for parameters in parameter_combinations:
             scores = []
 
-            for _ in range(self.n):
-                skf = StratifiedKFold(n_splits=2, shuffle=True)
+            for i in range(self.n):
+                skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=self.random_state + i)
 
                 for train_idx, test_idx in skf.split(X, y):
                     try:
