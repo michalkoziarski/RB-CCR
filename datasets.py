@@ -13,6 +13,8 @@ from urllib.request import urlretrieve
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data')
 FOLDS_PATH = os.path.join(os.path.dirname(__file__), 'folds')
 
+RANDOM_SEED = 42
+
 
 def download(url):
     name = url.split('/')[-1]
@@ -53,9 +55,9 @@ def encode(X, y, encode_features=True):
 def partition(X, y):
     partitions = []
 
-    for _ in range(5):
+    for i in range(5):
         folds = []
-        skf = StratifiedKFold(n_splits=2, shuffle=True)
+        skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=RANDOM_SEED + i)
 
         for train_idx, test_idx in skf.split(X, y):
             folds.append([train_idx, test_idx])
