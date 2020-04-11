@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 
 from itertools import product
@@ -34,17 +33,11 @@ class ResamplingCV:
                     try:
                         X_train, y_train = self.algorithm(**parameters).fit_sample(X[train_idx], y[train_idx])
                     except (ValueError, RuntimeError) as e:
-                        logging.warning('Error "%s" occurred during CV resampling with %s. '
-                                        'Setting parameter score to -inf.' % (e, self.algorithm.__name__))
-
                         scores.append(-np.inf)
 
                         break
                     else:
                         if len(np.unique(y_train)) < 2:
-                            logging.warning('One of the classes was eliminated during CV resampling with %s. '
-                                            'Setting parameter score to -inf.' % self.algorithm.__name__)
-
                             scores.append(-np.inf)
 
                             break
