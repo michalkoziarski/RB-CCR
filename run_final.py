@@ -29,9 +29,9 @@ def evaluate_trial(trial):
     dataset_name, fold, minority_training_size, classifier_name, resampler_name = trial
 
     if minority_training_size == -1:
-        minority_training_size = None
-
-    dataset = datasets.load(dataset_name, minority_training_size=minority_training_size)
+        dataset = datasets.load(dataset_name)
+    else:
+        dataset = datasets.load(dataset_name, minority_training_size=minority_training_size)
 
     (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
 
