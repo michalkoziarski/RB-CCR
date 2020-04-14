@@ -2,7 +2,6 @@ import datasets
 import metrics
 import multiprocessing as mp
 import numpy as np
-import os
 import pandas as pd
 
 from algorithm import CCR
@@ -116,8 +115,6 @@ def evaluate_trial(trial):
 
 
 if __name__ == '__main__':
-    results_path = os.path.join(os.path.dirname(__file__), 'results')
-
     trials = []
 
     for dataset_name in datasets.names('final'):
