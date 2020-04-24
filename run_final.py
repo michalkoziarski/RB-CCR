@@ -99,6 +99,7 @@ def evaluate_trial(trial):
     scoring_functions = {
         'precision': metrics.precision,
         'recall': metrics.recall,
+        'specificity': metrics.specificity,
         'auc': metrics.auc,
         'g-mean': metrics.g_mean,
         'f-measure': metrics.f_measure

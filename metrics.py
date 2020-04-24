@@ -35,3 +35,10 @@ def g_mean(ground_truth, predictions):
 
 def auc(ground_truth, predictions):
     return sklearn.metrics.roc_auc_score(ground_truth, predictions)
+
+
+def specificity(ground_truth, predictions, majority_class=None):
+    if majority_class is None:
+        majority_class = Counter(ground_truth).most_common()[0][0]
+
+    return sklearn.metrics.recall_score(ground_truth, predictions, pos_label=majority_class, zero_division=0)
