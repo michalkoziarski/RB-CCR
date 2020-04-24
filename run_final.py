@@ -116,26 +116,26 @@ def evaluate_trial(trial):
 
 
 if __name__ == '__main__':
-    trials = []
+    for minority_training_size in [-1, 5, 10, 15, 20, 30]:
+        trials = []
 
-    for dataset_name in datasets.names('final'):
-        for fold in range(10):
-            for minority_training_size in [-1, 5, 10, 15, 20, 30]:
+        for dataset_name in datasets.names('final'):
+            for fold in range(10):
                 for classifier_name in ['cart', 'knn', 'svm', 'lr', 'nb', 'mlp']:
                     for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr']:
                         trials.append((dataset_name, fold, minority_training_size, classifier_name, resampler_name))
 
-    with mp.Pool(N_PROCESSES) as pool:
-        row_blocks = list(tqdm(pool.imap(evaluate_trial, trials), total=len(trials)))
+        with mp.Pool(N_PROCESSES) as pool:
+            row_blocks = list(tqdm(pool.imap(evaluate_trial, trials), total=len(trials)))
 
-    rows = []
+        rows = []
 
-    for row_block in row_blocks:
-        for row in row_block:
-            rows.append(row)
+        for row_block in row_blocks:
+            for row in row_block:
+                rows.append(row)
 
-    columns = ['Dataset', 'Fold', 'Minority Size', 'Classifier', 'Resampler', 'Metric', 'Score']
+        columns = ['Dataset', 'Fold', 'Minority Size', 'Classifier', 'Resampler', 'Metric', 'Score']
 
-    RESULTS_PATH.mkdir(exist_ok=True, parents=True)
+        RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
-    pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / 'final.csv', index=False)
+        pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / f'final_{minority_training_size}.csv', index=False)
