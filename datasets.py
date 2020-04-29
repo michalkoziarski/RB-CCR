@@ -8,7 +8,7 @@ from collections import Counter
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from urllib.request import urlretrieve
 
 
@@ -135,7 +135,7 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
             folds.append([train_set, test_set])
 
             if scale:
-                scaler = MinMaxScaler().fit(train_set[0])
+                scaler = StandardScaler().fit(train_set[0])
 
                 train_set[0] = scaler.transform(train_set[0])
                 test_set[0] = scaler.transform(test_set[0])
