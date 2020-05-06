@@ -1,51 +1,100 @@
-import os
-import pandas as pd
-import matplotlib
-
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
-import seaborn as sns
+import datasets
 import metrics
+import multiprocessing as mp
+import numpy as np
+import pandas as pd
 
-from utils import evaluate, compare
-from sklearn.tree import DecisionTreeClassifier
-from algorithm import CCR
+from algorithm import CCRv2
 from cv import ResamplingCV
+from pathlib import Path
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from tqdm import tqdm
+
+
+RANDOM_STATE = 42
+N_PROCESSES = 24
+RESULTS_PATH = Path(__file__).parents[0] / 'results_preliminary'
+
+
+def evaluate_trial(trial):
+    dataset_name, fold, classifier_name, regions = trial
+
+    dataset = datasets.load(dataset_name)
+
+    (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
+
+    energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
+    gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
+
+    classifiers = {
+        'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
+        'knn': KNeighborsClassifier(),
+        'svm': LinearSVC(random_state=RANDOM_STATE),
+        'lr': LogisticRegression(random_state=RANDOM_STATE),
+        'nb': GaussianNB(),
+        'mlp': MLPClassifier(random_state=RANDOM_STATE)
+    }
+
+    classifier = classifiers[classifier_name]
+
+    resampler = ResamplingCV(
+        CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
+        random_state=[RANDOM_STATE], gamma=gammas,
+        regions=[regions], metrics=(metrics.auc,)
+    )
+
+    assert len(np.unique(y_train)) == len(np.unique(y_test)) == 2
+
+    if resampler is not None:
+        X_train, y_train = resampler.fit_sample(X_train, y_train)
+
+    clf = classifier.fit(X_train, y_train)
+    predictions = clf.predict(X_test)
+
+    scoring_functions = {
+        'precision': metrics.precision,
+        'recall': metrics.recall,
+        'specificity': metrics.specificity,
+        'auc': metrics.auc,
+        'g-mean': metrics.g_mean,
+        'f-measure': metrics.f_measure
+    }
+
+    row_block = []
+
+    for scoring_function_name in scoring_functions.keys():
+        score = scoring_functions[scoring_function_name](y_test, predictions)
+        row = [dataset_name, fold, classifier_name, regions, scoring_function_name, score]
+        row_block.append(row)
+
+    return row_block
 
 
 if __name__ == '__main__':
-    results_path = os.path.join(os.path.dirname(__file__), 'results')
+    trials = []
 
-    if not os.path.exists(results_path):
-        os.mkdir(results_path)
+    for dataset_name in datasets.names('final'):
+        for fold in range(10):
+            for classifier_name in ['cart', 'knn', 'svm', 'lr', 'nb', 'mlp']:
+                for regions in ['L', 'E', 'H', 'LE', 'LH', 'EH', 'LEH']:
+                    trials.append((dataset_name, fold, classifier_name, regions))
 
-    comparable = []
-    energies = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 50.0, 100.0]
-    gammas = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0]
+    with mp.Pool(N_PROCESSES) as pool:
+        row_blocks = list(tqdm(pool.imap(evaluate_trial, trials), total=len(trials)))
 
-    for gamma in gammas:
-        file_name = 'preliminary_cart_gamma_%s.csv' % gamma
-        classifier = DecisionTreeClassifier()
-        evaluate(ResamplingCV(CCR, classifier, energy=energies, gamma=[gamma], metrics=(metrics.auc,)),
-                 classifier, file_name, eval_type='preliminary')
-        comparable.append(file_name)
+    rows = []
 
-    summary, tables = compare(comparable)
+    for row_block in row_blocks:
+        for row in row_block:
+            rows.append(row)
 
-    for measure in ['auc', 'g-mean', 'f-measure']:
-        table = tables[measure]
-        data = []
+    columns = ['Dataset', 'Fold', 'Classifier', 'Regions', 'Metric', 'Score']
 
-        for dataset in table['dataset'].unique():
-            for gamma in gammas:
-                value = float(table[table['dataset'] == dataset]['preliminary_cart_gamma_%s.csv' % gamma])
-                data.append([dataset.replace('-', '').replace('_', ''), gamma, value])
+    RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
-        df = pd.DataFrame(data, columns=['dataset', 'gamma', 'value'])
-
-        grid = sns.FacetGrid(df, col='dataset', col_wrap=5)
-        grid.set(ylim=(0.0, 1.0), xticks=range(len(gammas)))
-        grid.set_xticklabels(gammas, rotation=90)
-        grid.map(plt.plot, 'value')
-        grid.savefig(os.path.join(results_path, 'preliminary_%s.pdf' % measure))
+    pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / 'preliminary_regions.csv', index=False)
