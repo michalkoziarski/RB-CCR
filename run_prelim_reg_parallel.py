@@ -17,68 +17,69 @@ from sklearn.tree import DecisionTreeClassifier
 
 
 def evaluate_trial(trial):
-    RANDOM_STATE = 42
-    RESULTS_PATH = Path(__file__).parents[0] / 'results_preliminary_regions'
+    for dataset_name in datasets.names('final'):
+        RANDOM_STATE = 42
+        RESULTS_PATH = Path(__file__).parents[0] / 'results_preliminary_regions'
 
-    dataset_name, fold, classifier_name, regions = trial
+        fold, classifier_name, regions = trial
 
-    trial_name = f'{dataset_name}_{fold}_{classifier_name}_{regions}'
+        trial_name = f'{dataset_name}_{fold}_{classifier_name}_{regions}'
 
-    logging.info(f'Evaluating {trial_name}...')
+        logging.info(f'Evaluating {trial_name}...')
 
-    dataset = datasets.load(dataset_name)
+        dataset = datasets.load(dataset_name)
 
-    (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
+        (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
 
-    energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
-    gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
+        energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
+        gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
 
-    classifiers = {
-        'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
-        'knn': KNeighborsClassifier(),
-        'svm': LinearSVC(random_state=RANDOM_STATE),
-        'lr': LogisticRegression(random_state=RANDOM_STATE),
-        'nb': GaussianNB(),
-        'mlp': MLPClassifier(random_state=RANDOM_STATE)
-    }
+        classifiers = {
+            'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
+            'knn': KNeighborsClassifier(),
+            'svm': LinearSVC(random_state=RANDOM_STATE),
+            'lr': LogisticRegression(random_state=RANDOM_STATE),
+            'nb': GaussianNB(),
+            'mlp': MLPClassifier(random_state=RANDOM_STATE)
+        }
 
-    classifier = classifiers[classifier_name]
+        classifier = classifiers[classifier_name]
 
-    resampler = ResamplingCV(
-        CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
-        random_state=[RANDOM_STATE], gamma=gammas,
-        regions=[regions], metrics=(metrics.auc,)
-    )
+        resampler = ResamplingCV(
+            CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
+            random_state=[RANDOM_STATE], gamma=gammas,
+            regions=[regions], metrics=(metrics.auc,)
+        )
 
-    assert len(np.unique(y_train)) == len(np.unique(y_test)) == 2
+        assert len(np.unique(y_train)) == len(np.unique(y_test)) == 2
 
-    if resampler is not None:
-        X_train, y_train = resampler.fit_sample(X_train, y_train)
+        if resampler is not None:
+            X_train, y_train = resampler.fit_sample(X_train, y_train)
 
-    clf = classifier.fit(X_train, y_train)
-    predictions = clf.predict(X_test)
+        clf = classifier.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
 
-    scoring_functions = {
-        'precision': metrics.precision,
-        'recall': metrics.recall,
-        'specificity': metrics.specificity,
-        'auc': metrics.auc,
-        'g-mean': metrics.g_mean,
-        'f-measure': metrics.f_measure
-    }
+        scoring_functions = {
+            'precision': metrics.precision,
+            'recall': metrics.recall,
+            'specificity': metrics.specificity,
+            'auc': metrics.auc,
+            'g-mean': metrics.g_mean,
+            'f-measure': metrics.f_measure
+        }
 
-    rows = []
+        rows = []
 
-    for scoring_function_name in scoring_functions.keys():
-        score = scoring_functions[scoring_function_name](y_test, predictions)
-        row = [dataset_name, fold, classifier_name, regions, scoring_function_name, score]
-        rows.append(row)
+        for scoring_function_name in scoring_functions.keys():
+            score = scoring_functions[scoring_function_name](y_test, predictions)
+            row = [dataset_name, fold, classifier_name, regions, scoring_function_name, score]
+            rows.append(row)
 
-    columns = ['Dataset', 'Fold', 'Classifier', 'Regions', 'Metric', 'Score']
+        columns = ['Dataset', 'Fold', 'Classifier', 'Regions', 'Metric', 'Score']
 
-    RESULTS_PATH.mkdir(exist_ok=True, parents=True)
+        RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
-    pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / f'{trial_name}.csv', index=False)
+        pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / f'{trial_name}.csv', index=False)
 
 
 if __name__ == '__main__':
@@ -87,10 +88,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-classifier_name', type=str)
-    parser.add_argument('-dataset_name', type=str)
     parser.add_argument('-fold', type=int)
     parser.add_argument('-regions', type=str)
 
     args = parser.parse_args()
 
-    evaluate_trial((args.dataset_name, args.fold, args.classifier_name, args.regions))
+    evaluate_trial((args.fold, args.classifier_name, args.regions))
