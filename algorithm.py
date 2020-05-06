@@ -155,7 +155,7 @@ class CCR:
 
 
 class CCRv2:
-    def __init__(self, energy, gamma=None, n_samples=100, threshold=0.33,
+    def __init__(self, energy, gamma=None, n_samples=250, threshold=0.33,
                  regions='LE', p_norm=1, n=None, random_state=None):
         self.energy = energy
         self.gamma = gamma
