@@ -268,7 +268,7 @@ class CCRv2:
                 lower_threshold = seed_score - self.threshold * (seed_score - np.min(scores + [seed_score]))
                 higher_threshold = seed_score + self.threshold * (np.max(scores + [seed_score]) - seed_score)
 
-                suitable_samples = []
+                suitable_samples = [minority_point]
 
                 for sample, score in zip(samples, scores):
                     if score <= lower_threshold:
