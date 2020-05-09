@@ -24,6 +24,10 @@ def evaluate_trial(trial):
         fold, classifier_name, regions = trial
 
         trial_name = f'{dataset_name}_{fold}_{classifier_name}_{regions}'
+        trial_path = RESULTS_PATH / f'{trial_name}.csv'
+
+        if trial_path.exists():
+            continue
 
         logging.info(f'Evaluating {trial_name}...')
 
@@ -79,7 +83,7 @@ def evaluate_trial(trial):
 
         RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
-        pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / f'{trial_name}.csv', index=False)
+        pd.DataFrame(rows, columns=columns).to_csv(trial_path, index=False)
 
 
 if __name__ == '__main__':
