@@ -143,30 +143,22 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
     return folds
 
 
-def names(eval_type=None):
-    assert eval_type in [None, 'preliminary', 'final']
-
+def names():
     result = []
 
-    for current_type in ['preliminary', 'final']:
-        if eval_type in [None, current_type]:
-            with open(os.path.join(os.path.dirname(__file__), 'datasets_%s.txt' % current_type)) as file:
-                for line in file.readlines():
-                    result.append(line.rstrip().split('/')[-1].replace('.zip', ''))
+    with open(os.path.join(os.path.dirname(__file__), 'urls.txt')) as file:
+        for line in file.readlines():
+            result.append(line.rstrip().split('/')[-1].replace('.zip', ''))
 
     return result
 
 
-def load_all(eval_type=None):
-    assert eval_type in [None, 'preliminary', 'final']
-
+def load_all():
     urls = []
 
-    for current_type in ['preliminary', 'final']:
-        if eval_type in [None, current_type]:
-            with open(os.path.join(os.path.dirname(__file__), 'datasets_%s.txt' % current_type)) as file:
-                for line in file.readlines():
-                    urls.append(line.rstrip())
+    with open(os.path.join(os.path.dirname(__file__), 'urls.txt')) as file:
+        for line in file.readlines():
+            urls.append(line.rstrip())
 
     datasets = {}
 

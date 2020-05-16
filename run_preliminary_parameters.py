@@ -16,7 +16,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 
 def evaluate_trial(trial):
-    for dataset_name in datasets.names('final'):
+    for dataset_name in datasets.names():
         RANDOM_STATE = 42
         RESULTS_PATH = Path(__file__).parents[0] / 'results_preliminary_parameters'
 

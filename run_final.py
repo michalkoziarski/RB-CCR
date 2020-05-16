@@ -119,7 +119,7 @@ if __name__ == '__main__':
     for minority_training_size in [-1, 5, 10, 15, 20, 30]:
         trials = []
 
-        for dataset_name in datasets.names('final'):
+        for dataset_name in datasets.names():
             for fold in range(10):
                 for classifier_name in ['cart', 'knn', 'svm', 'lr', 'nb', 'mlp']:
                     for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr']:
