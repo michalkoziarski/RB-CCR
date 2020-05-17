@@ -436,37 +436,41 @@ class CCRv3:
 
                 observation_regions = self.regions[observation_type]
 
-                seed_score = rbf_score(minority_point, majority_points, self.gamma)
-
-                lower_threshold = seed_score - self.threshold * (seed_score - np.min(scores + [seed_score]))
-                higher_threshold = seed_score + self.threshold * (np.max(scores + [seed_score]) - seed_score)
-
-                suitable_samples = [minority_point]
-
-                for sample, score in zip(samples, scores):
-                    if score <= lower_threshold:
-                        case = 'L'
-                    elif score >= higher_threshold:
-                        case = 'H'
-                    else:
-                        case = 'E'
-
-                    if case in observation_regions:
-                        suitable_samples.append(sample)
-
-                suitable_samples = np.array(suitable_samples)
-
-                if n_synthetic_samples <= len(suitable_samples):
-                    replace = False
+                if 'L' in observation_regions and 'E' in observation_regions and 'H' in observation_regions:
+                    for _ in range(n_synthetic_samples):
+                        appended.append(minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm))
                 else:
-                    replace = True
+                    seed_score = rbf_score(minority_point, majority_points, self.gamma)
 
-                selected_samples = suitable_samples[
-                    np.random.choice(len(suitable_samples), n_synthetic_samples, replace=replace)
-                ]
+                    lower_threshold = seed_score - self.threshold * (seed_score - np.min(scores + [seed_score]))
+                    higher_threshold = seed_score + self.threshold * (np.max(scores + [seed_score]) - seed_score)
 
-                for sample in selected_samples:
-                    appended.append(sample)
+                    suitable_samples = [minority_point]
+
+                    for sample, score in zip(samples, scores):
+                        if score <= lower_threshold:
+                            case = 'L'
+                        elif score >= higher_threshold:
+                            case = 'H'
+                        else:
+                            case = 'E'
+
+                        if case in observation_regions:
+                            suitable_samples.append(sample)
+
+                    suitable_samples = np.array(suitable_samples)
+
+                    if n_synthetic_samples <= len(suitable_samples):
+                        replace = False
+                    else:
+                        replace = True
+
+                    selected_samples = suitable_samples[
+                        np.random.choice(len(suitable_samples), n_synthetic_samples, replace=replace)
+                    ]
+
+                    for sample in selected_samples:
+                        appended.append(sample)
 
         majority_points += translations
 
