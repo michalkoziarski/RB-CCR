@@ -9,4 +9,4 @@ if __name__ == '__main__':
                     command = f'sbatch run.sh run_preliminary_regions_type.py -classifier_name {classifier_name} ' \
                               f'-fold {fold} -regions {regions} -type {region_type}'
 
-                    print(command)#os.system(command)
+                    os.system(command)
