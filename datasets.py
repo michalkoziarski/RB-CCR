@@ -143,27 +143,24 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
     return folds
 
 
-def names():
+def urls():
     result = []
 
     with open(os.path.join(os.path.dirname(__file__), 'urls.txt')) as file:
         for line in file.readlines():
-            result.append(line.rstrip().split('/')[-1].replace('.zip', ''))
+            result.append(line.rstrip())
 
     return result
 
 
+def names():
+    return [url.split('/')[-1].replace('.zip', '') for url in urls()]
+
+
 def load_all():
-    urls = []
-
-    with open(os.path.join(os.path.dirname(__file__), 'urls.txt')) as file:
-        for line in file.readlines():
-            urls.append(line.rstrip())
-
     datasets = {}
 
-    for url in urls:
-        name = url.split('/')[-1].replace('.zip', '')
+    for url, name in zip(urls(), names()):
         datasets[name] = load(name, url)
 
     return datasets
