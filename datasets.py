@@ -143,24 +143,29 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
     return folds
 
 
-def urls():
+def urls(small=False):
     result = []
 
-    with open(os.path.join(os.path.dirname(__file__), 'urls.txt')) as file:
+    if small:
+        file_name = 'urls_small.txt'
+    else:
+        file_name = 'urls.txt'
+
+    with open(os.path.join(os.path.dirname(__file__), file_name)) as file:
         for line in file.readlines():
             result.append(line.rstrip())
 
     return result
 
 
-def names():
-    return [url.split('/')[-1].replace('.zip', '') for url in urls()]
+def names(small=False):
+    return [url.split('/')[-1].replace('.zip', '') for url in urls(small)]
 
 
-def load_all():
+def load_all(small=False):
     datasets = {}
 
-    for url, name in zip(urls(), names()):
+    for url, name in zip(urls(small), names(small)):
         datasets[name] = load(name, url)
 
     return datasets
