@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 
-def distance(x, y, p_norm=1):
+def distance(x, y, p_norm=2):
     return np.sum(np.abs(x - y) ** p_norm) ** (1 / p_norm)
 
 
-def sample_inside_sphere(dimensionality, radius, p_norm=1):
+def sample_inside_sphere(dimensionality, radius, p_norm=2):
     direction_unit_vector = (2 * np.random.rand(dimensionality) - 1)
     direction_unit_vector = direction_unit_vector / distance(direction_unit_vector, np.zeros(dimensionality), p_norm)
 
@@ -21,7 +21,7 @@ def rbf(d, gamma):
         return np.exp(-(d / gamma) ** 2)
 
 
-def rbf_score(point, majority_points, gamma, p_norm=1):
+def rbf_score(point, majority_points, gamma, p_norm=2):
     result = 0.0
 
     for majority_point in majority_points:
@@ -31,7 +31,7 @@ def rbf_score(point, majority_points, gamma, p_norm=1):
 
 
 class CCR:
-    def __init__(self, energy, gamma=None, max_attempts=10, p_norm=1, n=None, random_state=None):
+    def __init__(self, energy, gamma=None, max_attempts=10, p_norm=2, n=None, random_state=None):
         self.energy = energy
         self.gamma = gamma
         self.max_attempts = max_attempts
@@ -158,7 +158,7 @@ class CCR:
 
 class CCRv2:
     def __init__(self, energy, gamma=None, n_samples=250, threshold=0.33,
-                 regions='LE', p_norm=1, n=None, random_state=None):
+                 regions='LE', p_norm=2, n=None, random_state=None):
         self.energy = energy
         self.gamma = gamma
         self.n_samples = n_samples
@@ -311,7 +311,7 @@ class CCRv2:
 
 class CCRv3:
     def __init__(self, energy, regions, gamma=None, n_samples=250, threshold=0.33,
-                 p_norm=1, n=None, random_state=None):
+                 p_norm=2, n=None, random_state=None):
         self.energy = energy
         self.gamma = gamma
         self.n_samples = n_samples
