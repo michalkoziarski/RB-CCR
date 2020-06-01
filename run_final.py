@@ -4,7 +4,7 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
-from algorithm import CCR
+from algorithm import CCR, CCRv2
 from cv import ResamplingCV
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import BorderlineSMOTE, SMOTE
@@ -36,6 +36,7 @@ def evaluate_trial(trial):
 
     energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
     gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
+    regions = ['L', 'E', 'H', 'LE', 'LH', 'EH', 'LEH']
 
     classifiers = {
         'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
@@ -83,6 +84,11 @@ def evaluate_trial(trial):
         'rb-ccr': ResamplingCV(
             CCR, classifier, seed=RANDOM_STATE, energy=energies,
             random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,)
+        ),
+        'rb-ccr-v2': ResamplingCV(
+            CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
+            random_state=[RANDOM_STATE], gamma=gammas,
+            regions=regions, metrics=(metrics.auc,)
         )
     }
 
@@ -122,7 +128,8 @@ if __name__ == '__main__':
         for dataset_name in datasets.names():
             for fold in range(10):
                 for classifier_name in ['cart', 'knn', 'svm', 'lr', 'nb', 'mlp']:
-                    for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr']:
+                    for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl',
+                                           'smote+enn', 'ccr', 'rb-ccr', 'rb-ccr-v2']:
                         trials.append((dataset_name, fold, minority_training_size, classifier_name, resampler_name))
 
         with mp.Pool(N_PROCESSES) as pool:
