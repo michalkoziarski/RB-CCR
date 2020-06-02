@@ -1,6 +1,7 @@
+import argparse
 import datasets
+import logging
 import metrics
-import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
@@ -16,133 +17,132 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from tqdm import tqdm
-
-
-RANDOM_STATE = 42
-N_PROCESSES = 24
-RESULTS_PATH = Path(__file__).parents[0] / 'results'
 
 
 def evaluate_trial(trial):
-    dataset_name, fold, minority_training_size, classifier_name, resampler_name = trial
+    for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr', 'rb-ccr-v2']:
+        RESULTS_PATH = Path(__file__).parents[0] / 'results_final'
+        RANDOM_STATE = 42
 
-    if minority_training_size == -1:
-        dataset = datasets.load(dataset_name)
-    else:
-        dataset = datasets.load(dataset_name, minority_training_size=minority_training_size)
+        classifier_name, dataset_name, fold, minority_training_size = trial
 
-    (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
+        trial_name = f'{dataset_name}_{minority_training_size}_{fold}_{classifier_name}_{resampler_name}'
+        trial_path = RESULTS_PATH / f'{trial_name}.csv'
 
-    energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
-    gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
-    regions = ['L', 'E', 'H', 'LE', 'LH', 'EH', 'LEH']
+        if trial_path.exists():
+            continue
 
-    classifiers = {
-        'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
-        'knn': KNeighborsClassifier(),
-        'svm': LinearSVC(random_state=RANDOM_STATE),
-        'lr': LogisticRegression(random_state=RANDOM_STATE),
-        'nb': GaussianNB(),
-        'mlp': MLPClassifier(random_state=RANDOM_STATE)
-    }
+        logging.info(f'Evaluating {trial_name}...')
 
-    classifier = classifiers[classifier_name]
+        if minority_training_size == -1:
+            dataset = datasets.load(dataset_name)
+        else:
+            dataset = datasets.load(dataset_name, minority_training_size=minority_training_size)
 
-    resamplers = {
-        'none': None,
-        'smote':  ResamplingCV(
-            SMOTE, classifier,
-            k_neighbors=[1, 3, 5, 7, 9],
-            random_state=[RANDOM_STATE], seed=RANDOM_STATE
-        ),
-        'bord': ResamplingCV(
-            BorderlineSMOTE, classifier,
-            k_neighbors=[1, 3, 5, 7, 9],
-            m_neighbors=[5, 10, 15],
-            random_state=[RANDOM_STATE], seed=RANDOM_STATE
-        ),
-        'ncl':  ResamplingCV(
-            NeighbourhoodCleaningRule, classifier,
-            n_neighbors=[1, 3, 5, 7],
-            seed=RANDOM_STATE
-        ),
-        'smote+tl': ResamplingCV(
-            SMOTETomek, classifier,
-            smote=[SMOTE(k_neighbors=k) for k in [1, 3, 5, 7, 9]],
-            random_state=[RANDOM_STATE], seed=RANDOM_STATE
-        ),
-        'smote+enn': ResamplingCV(
-            SMOTEENN, classifier,
-            smote=[SMOTE(k_neighbors=k) for k in [1, 3, 5, 7, 9]],
-            random_state=[RANDOM_STATE], seed=RANDOM_STATE
-        ),
-        'ccr': ResamplingCV(
-            CCR, classifier, seed=RANDOM_STATE, energy=energies,
-            random_state=[RANDOM_STATE], metrics=(metrics.auc,)
-        ),
-        'rb-ccr': ResamplingCV(
-            CCR, classifier, seed=RANDOM_STATE, energy=energies,
-            random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,)
-        ),
-        'rb-ccr-v2': ResamplingCV(
-            CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
-            random_state=[RANDOM_STATE], gamma=gammas,
-            regions=regions, metrics=(metrics.auc,)
-        )
-    }
+        (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
 
-    resampler = resamplers[resampler_name]
+        energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
+        gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
+        regions = ['L', 'E', 'H', 'LE', 'LH', 'EH', 'LEH']
 
-    assert len(np.unique(y_train)) == len(np.unique(y_test)) == 2
+        classifiers = {
+            'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
+            'knn': KNeighborsClassifier(),
+            'svm': LinearSVC(random_state=RANDOM_STATE),
+            'lr': LogisticRegression(random_state=RANDOM_STATE),
+            'nb': GaussianNB(),
+            'mlp': MLPClassifier(random_state=RANDOM_STATE)
+        }
 
-    if resampler is not None:
-        X_train, y_train = resampler.fit_sample(X_train, y_train)
+        classifier = classifiers[classifier_name]
 
-    clf = classifier.fit(X_train, y_train)
-    predictions = clf.predict(X_test)
+        resamplers = {
+            'none': None,
+            'smote':  ResamplingCV(
+                SMOTE, classifier,
+                k_neighbors=[1, 3, 5, 7, 9],
+                random_state=[RANDOM_STATE], seed=RANDOM_STATE
+            ),
+            'bord': ResamplingCV(
+                BorderlineSMOTE, classifier,
+                k_neighbors=[1, 3, 5, 7, 9],
+                m_neighbors=[5, 10, 15],
+                random_state=[RANDOM_STATE], seed=RANDOM_STATE
+            ),
+            'ncl':  ResamplingCV(
+                NeighbourhoodCleaningRule, classifier,
+                n_neighbors=[1, 3, 5, 7],
+                seed=RANDOM_STATE
+            ),
+            'smote+tl': ResamplingCV(
+                SMOTETomek, classifier,
+                smote=[SMOTE(k_neighbors=k) for k in [1, 3, 5, 7, 9]],
+                random_state=[RANDOM_STATE], seed=RANDOM_STATE
+            ),
+            'smote+enn': ResamplingCV(
+                SMOTEENN, classifier,
+                smote=[SMOTE(k_neighbors=k) for k in [1, 3, 5, 7, 9]],
+                random_state=[RANDOM_STATE], seed=RANDOM_STATE
+            ),
+            'ccr': ResamplingCV(
+                CCR, classifier, seed=RANDOM_STATE, energy=energies,
+                random_state=[RANDOM_STATE], metrics=(metrics.auc,)
+            ),
+            'rb-ccr': ResamplingCV(
+                CCR, classifier, seed=RANDOM_STATE, energy=energies,
+                random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,)
+            ),
+            'rb-ccr-v2': ResamplingCV(
+                CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
+                random_state=[RANDOM_STATE], gamma=gammas,
+                regions=regions, metrics=(metrics.auc,)
+            )
+        }
 
-    scoring_functions = {
-        'precision': metrics.precision,
-        'recall': metrics.recall,
-        'specificity': metrics.specificity,
-        'auc': metrics.auc,
-        'g-mean': metrics.g_mean,
-        'f-measure': metrics.f_measure
-    }
+        resampler = resamplers[resampler_name]
 
-    row_block = []
+        assert len(np.unique(y_train)) == len(np.unique(y_test)) == 2
 
-    for scoring_function_name in scoring_functions.keys():
-        score = scoring_functions[scoring_function_name](y_test, predictions)
-        row = [dataset_name, fold, minority_training_size, classifier_name, resampler_name, scoring_function_name, score]
-        row_block.append(row)
+        if resampler is not None:
+            X_train, y_train = resampler.fit_sample(X_train, y_train)
 
-    return row_block
+        clf = classifier.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
 
-
-if __name__ == '__main__':
-    for minority_training_size in [-1, 5, 10, 15, 20, 30]:
-        trials = []
-
-        for dataset_name in datasets.names():
-            for fold in range(10):
-                for classifier_name in ['cart', 'knn', 'svm', 'lr', 'nb', 'mlp']:
-                    for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl',
-                                           'smote+enn', 'ccr', 'rb-ccr', 'rb-ccr-v2']:
-                        trials.append((dataset_name, fold, minority_training_size, classifier_name, resampler_name))
-
-        with mp.Pool(N_PROCESSES) as pool:
-            row_blocks = list(tqdm(pool.imap(evaluate_trial, trials), total=len(trials)))
+        scoring_functions = {
+            'precision': metrics.precision,
+            'recall': metrics.recall,
+            'specificity': metrics.specificity,
+            'auc': metrics.auc,
+            'g-mean': metrics.g_mean,
+            'f-measure': metrics.f_measure
+        }
 
         rows = []
 
-        for row_block in row_blocks:
-            for row in row_block:
-                rows.append(row)
+        for scoring_function_name in scoring_functions.keys():
+            score = scoring_functions[scoring_function_name](y_test, predictions)
+            row = [dataset_name, minority_training_size, fold, classifier_name,
+                   resampler_name, scoring_function_name, score]
+            rows.append(row)
 
-        columns = ['Dataset', 'Fold', 'Minority Size', 'Classifier', 'Resampler', 'Metric', 'Score']
+        columns = ['Dataset', 'MTS', 'Fold', 'Classifier', 'Resampler', 'Metric', 'Score']
 
         RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
-        pd.DataFrame(rows, columns=columns).to_csv(RESULTS_PATH / f'final_{minority_training_size}.csv', index=False)
+        pd.DataFrame(rows, columns=columns).to_csv(trial_path, index=False)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-classifier_name', type=str)
+    parser.add_argument('-dataset_name', type=str)
+    parser.add_argument('-fold', type=int)
+    parser.add_argument('-minority_training_size', type=int)
+
+    args = parser.parse_args()
+
+    evaluate_trial((args.classifier_name, args.dataset_name, args.fold, args.minority_training_size))
