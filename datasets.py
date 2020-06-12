@@ -110,7 +110,7 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
         for j in range(2):
             train_idx, test_idx = partitions[i][j]
 
-            if minority_training_size is None:
+            if minority_training_size is None or minority_training_size == -1:
                 train_set = [X[train_idx], y[train_idx]]
             else:
                 X_train, y_train = X[train_idx], y[train_idx]
