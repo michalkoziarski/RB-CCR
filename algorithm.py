@@ -932,12 +932,12 @@ class CCRv6:
 
                 for _ in range(self.n_samples):
                     sample = minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm)
-                    score = clf.predict_proba([sample])[0, minority_class]
+                    score = clf.predict_proba([sample])[0, int(minority_class)]
 
                     samples.append(sample)
                     scores.append(score)
 
-                seed_score = clf.predict_proba([minority_point])[0, minority_class]
+                seed_score = clf.predict_proba([minority_point])[0, int(minority_class)]
 
                 lower_threshold = seed_score - self.threshold * (seed_score - np.min(scores + [seed_score]))
                 higher_threshold = seed_score + self.threshold * (np.max(scores + [seed_score]) - seed_score)
