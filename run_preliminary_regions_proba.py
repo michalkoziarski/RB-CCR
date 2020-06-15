@@ -15,7 +15,7 @@ from sklearn.svm import SVC
 
 def evaluate_trial(trial):
     for minority_training_size in [-1, 10]:
-        for dataset_name in datasets.names(small=True):
+        for dataset_name in datasets.names(small=False):
             RANDOM_STATE = 42
             RESULTS_PATH = Path(__file__).parents[0] / f'results_preliminary_regions_proba_{minority_training_size}'
 
