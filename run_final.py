@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 from algorithms.v1 import CCR
-from algorithms.v2 import CCRv2
 from cv import ResamplingCV
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import BorderlineSMOTE, SMOTE
@@ -22,7 +21,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 def evaluate_trial(trial):
     for dataset_name in datasets.names():
-        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr', 'rb-ccr-v2']:
+        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr']:
             RESULTS_PATH = Path(__file__).parents[0] / 'results_final'
             RANDOM_STATE = 42
 
@@ -45,7 +44,6 @@ def evaluate_trial(trial):
 
             energies = [0.5, 1.0, 2.5, 5.0, 10.0, 25.0, 50.0, 100.0]
             gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
-            regions = ['L', 'E', 'H', 'LE', 'LH', 'EH', 'LEH']
 
             classifiers = {
                 'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
@@ -93,11 +91,6 @@ def evaluate_trial(trial):
                 'rb-ccr': ResamplingCV(
                     CCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,)
-                ),
-                'rb-ccr-v2': ResamplingCV(
-                    CCRv2, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=gammas,
-                    regions=regions, metrics=(metrics.auc,)
                 )
             }
 
