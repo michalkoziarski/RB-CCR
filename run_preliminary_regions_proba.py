@@ -5,7 +5,7 @@ import metrics
 import numpy as np
 import pandas as pd
 
-from algorithm import CCRv6
+from algorithms.v6 import CCRv6
 from cv import ResamplingCV
 from pathlib import Path
 from sklearn.linear_model import LogisticRegression

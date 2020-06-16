@@ -4,7 +4,7 @@ import metrics
 import numpy as np
 import pandas as pd
 
-from algorithm import CCR
+from algorithms.v1 import CCR
 from pathlib import Path
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split

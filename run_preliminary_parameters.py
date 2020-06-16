@@ -5,7 +5,7 @@ import metrics
 import numpy as np
 import pandas as pd
 
-from algorithm import CCR
+from algorithms.v1 import CCR
 from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB

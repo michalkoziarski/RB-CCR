@@ -5,7 +5,8 @@ import metrics
 import numpy as np
 import pandas as pd
 
-from algorithm import CCR, CCRv2
+from algorithms.v1 import CCR
+from algorithms.v2 import CCRv2
 from cv import ResamplingCV
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import BorderlineSMOTE, SMOTE
