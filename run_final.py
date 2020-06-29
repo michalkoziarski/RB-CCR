@@ -5,7 +5,7 @@ import metrics
 import numpy as np
 import pandas as pd
 
-from algorithms.v1 import CCR
+from algorithms.v7 import CCRv7
 from cv import ResamplingCV
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import BorderlineSMOTE, SMOTE
@@ -15,19 +15,19 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.tree import DecisionTreeClassifier
 
 
 def evaluate_trial(trial):
     for dataset_name in datasets.names():
-        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr']:
+        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr', 'rb-ccr-cv']:
             RESULTS_PATH = Path(__file__).parents[0] / 'results_final'
             RANDOM_STATE = 42
 
-            classifier_name, fold, minority_training_size = trial
+            classifier_name, fold = trial
 
-            trial_name = f'{dataset_name}_{minority_training_size}_{fold}_{classifier_name}_{resampler_name}'
+            trial_name = f'{dataset_name}_{fold}_{classifier_name}_{resampler_name}'
             trial_path = RESULTS_PATH / f'{trial_name}.csv'
 
             if trial_path.exists():
@@ -35,10 +35,7 @@ def evaluate_trial(trial):
 
             logging.info(f'Evaluating {trial_name}...')
 
-            if minority_training_size == -1:
-                dataset = datasets.load(dataset_name)
-            else:
-                dataset = datasets.load(dataset_name, minority_training_size=minority_training_size)
+            dataset = datasets.load(dataset_name)
 
             (X_train, y_train), (X_test, y_test) = dataset[fold][0], dataset[fold][1]
 
@@ -49,9 +46,12 @@ def evaluate_trial(trial):
                 'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
                 'knn': KNeighborsClassifier(),
                 'svm': LinearSVC(random_state=RANDOM_STATE),
+                'rsvm': SVC(random_state=RANDOM_STATE, kernel='rbf'),
+                'psvm': SVC(random_state=RANDOM_STATE, kernel='poly'),
                 'lr': LogisticRegression(random_state=RANDOM_STATE),
                 'nb': GaussianNB(),
-                'mlp': MLPClassifier(random_state=RANDOM_STATE)
+                'mlp': MLPClassifier(random_state=RANDOM_STATE),
+                'lmlp': MLPClassifier(random_state=RANDOM_STATE, activation='identity')
             }
 
             classifier = classifiers[classifier_name]
@@ -85,12 +85,17 @@ def evaluate_trial(trial):
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
                 'ccr': ResamplingCV(
-                    CCR, classifier, seed=RANDOM_STATE, energy=energies,
+                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], metrics=(metrics.auc,)
                 ),
                 'rb-ccr': ResamplingCV(
-                    CCR, classifier, seed=RANDOM_STATE, energy=energies,
+                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,)
+                ),
+                'rb-ccr-cv': ResamplingCV(
+                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
+                    regions=['L', 'E', 'H']
                 )
             }
 
@@ -117,11 +122,10 @@ def evaluate_trial(trial):
 
             for scoring_function_name in scoring_functions.keys():
                 score = scoring_functions[scoring_function_name](y_test, predictions)
-                row = [dataset_name, minority_training_size, fold, classifier_name,
-                       resampler_name, scoring_function_name, score]
+                row = [dataset_name, fold, classifier_name, resampler_name, scoring_function_name, score]
                 rows.append(row)
 
-            columns = ['Dataset', 'Size', 'Fold', 'Classifier', 'Resampler', 'Metric', 'Score']
+            columns = ['Dataset', 'Fold', 'Classifier', 'Resampler', 'Metric', 'Score']
 
             RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
@@ -135,8 +139,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-classifier_name', type=str)
     parser.add_argument('-fold', type=int)
-    parser.add_argument('-minority_training_size', type=int)
 
     args = parser.parse_args()
 
-    evaluate_trial((args.classifier_name, args.fold, args.minority_training_size))
+    evaluate_trial((args.classifier_name, args.fold))

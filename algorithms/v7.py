@@ -96,20 +96,20 @@ class CCRv7:
             n_synthetic_samples = int(np.round(1.0 / (radii[i] * np.sum(1.0 / radii)) * n))
             r = radii[i]
 
-            samples = []
-            scores = []
-
-            for _ in range(self.n_samples):
-                sample = minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm)
-                score = rbf_score(sample, minority_points, self.gamma)
-
-                samples.append(sample)
-                scores.append(score)
-
             if self.gamma is None or ('L' in self.regions and 'E' in self.regions and 'H' in self.regions):
                 for _ in range(n_synthetic_samples):
                     appended.append(minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm))
             else:
+                samples = []
+                scores = []
+
+                for _ in range(self.n_samples):
+                    sample = minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm)
+                    score = rbf_score(sample, minority_points, self.gamma)
+
+                    samples.append(sample)
+                    scores.append(score)
+
                 seed_score = rbf_score(minority_point, minority_points, self.gamma)
 
                 lower_threshold = seed_score - self.threshold * (seed_score - np.min(scores + [seed_score]))

@@ -53,4 +53,7 @@ class ResamplingCV:
                 best_score = score
                 best_parameters = parameters
 
+        if best_parameters is None:
+            best_parameters = parameter_combinations[0]
+
         return self.algorithm(**best_parameters).fit_sample(X, y)
