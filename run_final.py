@@ -21,7 +21,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 def evaluate_trial(trial):
     for dataset_name in datasets.names():
-        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn', 'ccr', 'rb-ccr', 'rb-ccr-cv']:
+        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn',
+                               'ccr', 'rb-ccr-h', 'rb-ccr-e', 'rb-ccr-l', 'rb-ccr-cv']:
             RESULTS_PATH = Path(__file__).parents[0] / 'results_final'
             RANDOM_STATE = 42
 
@@ -88,9 +89,20 @@ def evaluate_trial(trial):
                     CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], metrics=(metrics.auc,)
                 ),
-                'rb-ccr': ResamplingCV(
+                'rb-ccr-h': ResamplingCV(
                     CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,)
+                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
+                    regions=['H']
+                ),
+                'rb-ccr-e': ResamplingCV(
+                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
+                    regions=['E']
+                ),
+                'rb-ccr-l': ResamplingCV(
+                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
+                    regions=['L']
                 ),
                 'rb-ccr-cv': ResamplingCV(
                     CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
