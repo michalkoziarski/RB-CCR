@@ -19,14 +19,12 @@ from sklearn.svm import LinearSVC, SVC
 from sklearn.tree import DecisionTreeClassifier
 
 
-def evaluate_trial(trial):
+def evaluate_trial(classifier_name, fold):
     for dataset_name in datasets.names():
         for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn',
                                'ccr', 'rb-ccr-h', 'rb-ccr-e', 'rb-ccr-l', 'rb-ccr-cv']:
             RESULTS_PATH = Path(__file__).parents[0] / 'results_final'
             RANDOM_STATE = 42
-
-            classifier_name, fold = trial
 
             trial_name = f'{dataset_name}_{fold}_{classifier_name}_{resampler_name}'
             trial_path = RESULTS_PATH / f'{trial_name}.csv'
@@ -154,4 +152,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    evaluate_trial((args.classifier_name, args.fold))
+    evaluate_trial(args.classifier_name, args.fold)
