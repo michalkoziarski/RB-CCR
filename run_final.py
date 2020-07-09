@@ -5,7 +5,7 @@ import metrics
 import numpy as np
 import pandas as pd
 
-from algorithms.v7 import CCRv7
+from algorithm import RBCCR
 from cv import ResamplingCV
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import BorderlineSMOTE, SMOTE
@@ -86,26 +86,26 @@ def evaluate_trial(trial):
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
                 'ccr': ResamplingCV(
-                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], metrics=(metrics.auc,)
                 ),
                 'rb-ccr-h': ResamplingCV(
-                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['H']
                 ),
                 'rb-ccr-e': ResamplingCV(
-                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['E']
                 ),
                 'rb-ccr-l': ResamplingCV(
-                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['L']
                 ),
                 'rb-ccr-cv': ResamplingCV(
-                    CCRv7, classifier, seed=RANDOM_STATE, energy=energies,
+                    RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['L', 'E', 'H']
                 )
