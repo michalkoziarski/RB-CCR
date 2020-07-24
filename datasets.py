@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 import pickle
 
-from collections import Counter
-from imblearn.under_sampling import RandomUnderSampler
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
@@ -69,7 +67,7 @@ def partition(X, y):
     return partitions
 
 
-def load(name, url=None, encode_features=True, remove_metadata=True, scale=True, minority_training_size=None):
+def load(name, url=None, encode_features=True, remove_metadata=True, scale=True):
     file_name = '%s.dat' % name
 
     if url is not None:
@@ -110,29 +108,8 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
         for j in range(2):
             train_idx, test_idx = partitions[i][j]
 
-            if minority_training_size is None or minority_training_size == -1:
-                train_set = [X[train_idx], y[train_idx]]
-            else:
-                X_train, y_train = X[train_idx], y[train_idx]
-
-                minority_class = Counter(y).most_common()[1][0]
-                majority_class = Counter(y).most_common()[0][0]
-
-                n_minority = Counter(y_train).most_common()[1][1]
-                n_majority = Counter(y_train).most_common()[0][1]
-
-                X_train, y_train = RandomUnderSampler(
-                    sampling_strategy={
-                        minority_class: np.min([n_minority, minority_training_size]),
-                        majority_class: n_majority
-                    },
-                    random_state=RANDOM_SEED,
-                ).fit_sample(X_train, y_train)
-
-                train_set = [X_train, y_train]
-
+            train_set = [X[train_idx], y[train_idx]]
             test_set = [X[test_idx], y[test_idx]]
-            folds.append([train_set, test_set])
 
             if scale:
                 scaler = StandardScaler().fit(train_set[0])
@@ -140,16 +117,18 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True,
                 train_set[0] = scaler.transform(train_set[0])
                 test_set[0] = scaler.transform(test_set[0])
 
+            folds.append([train_set, test_set])
+
     return folds
 
 
-def urls(small=False):
+def urls(multiclass=False):
     result = []
 
-    if small:
-        file_name = 'urls_small.txt'
+    if multiclass:
+        file_name = 'urls_multiclass.txt'
     else:
-        file_name = 'urls.txt'
+        file_name = 'urls_binary.txt'
 
     with open(os.path.join(os.path.dirname(__file__), file_name)) as file:
         for line in file.readlines():
@@ -158,18 +137,19 @@ def urls(small=False):
     return result
 
 
-def names(small=False):
-    return [url.split('/')[-1].replace('.zip', '') for url in urls(small)]
+def names(multiclass=False):
+    return [url.split('/')[-1].replace('.zip', '') for url in urls(multiclass)]
 
 
-def load_all(small=False):
+def load_all(multiclass=False):
     datasets = {}
 
-    for url, name in zip(urls(small), names(small)):
+    for url, name in zip(urls(multiclass), names(multiclass)):
         datasets[name] = load(name, url)
 
     return datasets
 
 
 if __name__ == '__main__':
-    load_all()
+    for mc in [False, True]:
+        load_all(multiclass=mc)
