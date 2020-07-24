@@ -57,7 +57,7 @@ def evaluate_trial(classifier_name, fold):
 
             resamplers = {
                 'None': None,
-                'SMOTE':  ResamplingCV(
+                'SMOTE': ResamplingCV(
                     SMOTE, classifier,
                     k_neighbors=[1, 3, 5, 7, 9],
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
@@ -68,7 +68,7 @@ def evaluate_trial(classifier_name, fold):
                     m_neighbors=[5, 10, 15],
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
-                'NCL':  ResamplingCV(
+                'NCL': ResamplingCV(
                     NeighbourhoodCleaningRule, classifier,
                     n_neighbors=[1, 3, 5, 7],
                     seed=RANDOM_STATE
