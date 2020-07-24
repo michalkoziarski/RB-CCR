@@ -85,7 +85,7 @@ def evaluate_trial(classifier_name, fold):
                 ),
                 'ccr': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], metrics=(metrics.auc,)
+                    random_state=[RANDOM_STATE], gamma=[None], metrics=(metrics.auc,)
                 ),
                 'rb-ccr-h': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,

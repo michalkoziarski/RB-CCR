@@ -19,39 +19,23 @@ def rbf(d, gamma):
         return np.exp(-(d / gamma) ** 2)
 
 
-def rbf_score(point, minority_points, majority_points, gamma, p_norm=2, scoring='minority'):
-    assert scoring in ['minority', 'majority', 'relative']
-
+def rbf_score(point, minority_points, gamma, p_norm=2):
     result = 0.0
 
-    if scoring == 'minority':
-        for reference_point in minority_points:
-            result += rbf(distance(point, reference_point, p_norm), gamma)
-    elif scoring == 'majority':
-        for reference_point in majority_points:
-            result += rbf(distance(point, reference_point, p_norm), gamma)
-    elif scoring == 'relative':
-        for reference_point in majority_points:
-            result += rbf(distance(point, reference_point, p_norm), gamma)
-
-        for reference_point in minority_points:
-            result -= rbf(distance(point, reference_point, p_norm), gamma)
-    else:
-        raise NotImplementedError
+    for minority_point in minority_points:
+        result += rbf(distance(point, minority_point, p_norm), gamma)
 
     return result
 
 
 class RBCCR:
-    def __init__(self, energy, gamma=None, n_samples=100, threshold=0.33,
-                 regions='E', scoring='minority', p_norm=2,
-                 minority_class=None, n=None, random_state=None):
+    def __init__(self, energy, gamma=1.0, n_samples=100, threshold=0.33,
+                 regions='E', p_norm=2, minority_class=None, n=None, random_state=None):
         self.energy = energy
         self.gamma = gamma
         self.n_samples = n_samples
         self.threshold = threshold
         self.regions = regions
-        self.scoring = scoring
         self.p_norm = p_norm
         self.minority_class = minority_class
         self.n = n
@@ -168,12 +152,12 @@ class RBCCR:
 
                 for _ in range(self.n_samples):
                     sample = minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm)
-                    score = rbf_score(sample, minority_points, majority_points, self.gamma, self.p_norm, self.scoring)
+                    score = rbf_score(sample, minority_points, self.gamma, self.p_norm)
 
                     samples.append(sample)
                     scores.append(score)
 
-                seed_score = rbf_score(minority_point, minority_points, majority_points, self.gamma, self.p_norm, self.scoring)
+                seed_score = rbf_score(minority_point, minority_points, self.gamma, self.p_norm)
 
                 lower_threshold = seed_score - self.threshold * (seed_score - np.min(scores + [seed_score]))
                 higher_threshold = seed_score + self.threshold * (np.max(scores + [seed_score]) - seed_score)
@@ -218,9 +202,8 @@ class RBCCR:
 
 
 class MultiClassRBCCR:
-    def __init__(self, energy, gamma=None, n_samples=100, threshold=0.33,
-                 regions='E', scoring='minority', p_norm=2,
-                 random_state=None, method='sampling'):
+    def __init__(self, energy, gamma=1.0, n_samples=100, threshold=0.33,
+                 regions='E', p_norm=2, random_state=None, method='sampling'):
         assert method in ['sampling', 'complete']
 
         self.energy = energy
@@ -228,7 +211,6 @@ class MultiClassRBCCR:
         self.n_samples = n_samples
         self.threshold = threshold
         self.regions = regions
-        self.scoring = scoring
         self.p_norm = p_norm
         self.random_state = random_state
         self.method = method
@@ -273,7 +255,7 @@ class MultiClassRBCCR:
 
                 ccr = RBCCR(
                     energy=self.energy, gamma=self.gamma, n_samples=self.n_samples,
-                    threshold=self.threshold, regions=self.regions, scoring=self.scoring,
+                    threshold=self.threshold, regions=self.regions,
                     p_norm=self.p_norm, minority_class=current_class, n=n
                 )
 
@@ -302,7 +284,7 @@ class MultiClassRBCCR:
 
                 ccr = RBCCR(
                     energy=self.energy, gamma=self.gamma, n_samples=self.n_samples,
-                    threshold=self.threshold, regions=self.regions, scoring=self.scoring,
+                    threshold=self.threshold, regions=self.regions,
                     p_norm=self.p_norm, minority_class=current_class, n=n
                 )
 
