@@ -21,8 +21,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 def evaluate_trial(classifier_name, fold):
     for dataset_name in datasets.names():
-        for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn',
-                               'ccr', 'rb-ccr-h', 'rb-ccr-e', 'rb-ccr-l', 'rb-ccr-cv']:
+        for resampler_name in ['None', 'SMOTE', 'Bord', 'NCL', 'SMOTE+TL', 'SMOTE+EN',
+                               'CCR', 'RB-CCR-H', 'RB-CCR-E', 'RB-CCR-L', 'RB-CCR-CV']:
             RESULTS_PATH = Path(__file__).parents[0] / 'results_binary'
             RANDOM_STATE = 42
 
@@ -42,67 +42,67 @@ def evaluate_trial(classifier_name, fold):
             gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
 
             classifiers = {
-                'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
-                'knn': KNeighborsClassifier(),
-                'svm': LinearSVC(random_state=RANDOM_STATE),
-                'rsvm': SVC(random_state=RANDOM_STATE, kernel='rbf'),
-                'psvm': SVC(random_state=RANDOM_STATE, kernel='poly'),
-                'lr': LogisticRegression(random_state=RANDOM_STATE),
-                'nb': GaussianNB(),
-                'mlp': MLPClassifier(random_state=RANDOM_STATE),
-                'lmlp': MLPClassifier(random_state=RANDOM_STATE, activation='identity')
+                'CART': DecisionTreeClassifier(random_state=RANDOM_STATE),
+                'KNN': KNeighborsClassifier(),
+                'L-SVM': LinearSVC(random_state=RANDOM_STATE),
+                'R-SVM': SVC(random_state=RANDOM_STATE, kernel='rbf'),
+                'P-SVM': SVC(random_state=RANDOM_STATE, kernel='poly'),
+                'LR': LogisticRegression(random_state=RANDOM_STATE),
+                'NB': GaussianNB(),
+                'R-MLP': MLPClassifier(random_state=RANDOM_STATE),
+                'L-MLP': MLPClassifier(random_state=RANDOM_STATE, activation='identity')
             }
 
             classifier = classifiers[classifier_name]
 
             resamplers = {
-                'none': None,
-                'smote':  ResamplingCV(
+                'None': None,
+                'SMOTE':  ResamplingCV(
                     SMOTE, classifier,
                     k_neighbors=[1, 3, 5, 7, 9],
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
-                'bord': ResamplingCV(
+                'Bord': ResamplingCV(
                     BorderlineSMOTE, classifier,
                     k_neighbors=[1, 3, 5, 7, 9],
                     m_neighbors=[5, 10, 15],
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
-                'ncl':  ResamplingCV(
+                'NCL':  ResamplingCV(
                     NeighbourhoodCleaningRule, classifier,
                     n_neighbors=[1, 3, 5, 7],
                     seed=RANDOM_STATE
                 ),
-                'smote+tl': ResamplingCV(
+                'SMOTE+TL': ResamplingCV(
                     SMOTETomek, classifier,
                     smote=[SMOTE(k_neighbors=k) for k in [1, 3, 5, 7, 9]],
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
-                'smote+enn': ResamplingCV(
+                'SMOTE+EN': ResamplingCV(
                     SMOTEENN, classifier,
                     smote=[SMOTE(k_neighbors=k) for k in [1, 3, 5, 7, 9]],
                     random_state=[RANDOM_STATE], seed=RANDOM_STATE
                 ),
-                'ccr': ResamplingCV(
+                'CCR': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=[None], metrics=(metrics.auc,)
                 ),
-                'rb-ccr-h': ResamplingCV(
+                'RB-CCR-H': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['H']
                 ),
-                'rb-ccr-e': ResamplingCV(
+                'RB-CCR-E': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['E']
                 ),
-                'rb-ccr-l': ResamplingCV(
+                'RB-CCR-L': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['L']
                 ),
-                'rb-ccr-cv': ResamplingCV(
+                'RB-CCR-CV': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
                     regions=['L', 'E', 'H']
@@ -120,12 +120,12 @@ def evaluate_trial(classifier_name, fold):
             predictions = clf.predict(X_test)
 
             scoring_functions = {
-                'precision': metrics.precision,
-                'recall': metrics.recall,
-                'specificity': metrics.specificity,
-                'auc': metrics.auc,
-                'g-mean': metrics.g_mean,
-                'f-measure': metrics.f_measure
+                'Precision': metrics.precision,
+                'Recall': metrics.recall,
+                'Specificity': metrics.specificity,
+                'AUC': metrics.auc,
+                'G-mean': metrics.g_mean,
+                'F-measure': metrics.f_measure
             }
 
             rows = []

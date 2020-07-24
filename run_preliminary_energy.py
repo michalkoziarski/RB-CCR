@@ -36,15 +36,15 @@ def evaluate_trial(classifier_name, fold, energy):
         gammas = [0.5, 1.0, 2.5, 5.0, 10.0]
 
         classifiers = {
-            'cart': DecisionTreeClassifier(random_state=RANDOM_STATE),
-            'knn': KNeighborsClassifier(),
-            'svm': LinearSVC(random_state=RANDOM_STATE),
-            'rsvm': SVC(random_state=RANDOM_STATE, kernel='rbf'),
-            'psvm': SVC(random_state=RANDOM_STATE, kernel='poly'),
-            'lr': LogisticRegression(random_state=RANDOM_STATE),
-            'nb': GaussianNB(),
-            'mlp': MLPClassifier(random_state=RANDOM_STATE),
-            'lmlp': MLPClassifier(random_state=RANDOM_STATE, activation='identity')
+            'CART': DecisionTreeClassifier(random_state=RANDOM_STATE),
+            'KNN': KNeighborsClassifier(),
+            'L-SVM': LinearSVC(random_state=RANDOM_STATE),
+            'R-SVM': SVC(random_state=RANDOM_STATE, kernel='rbf'),
+            'P-SVM': SVC(random_state=RANDOM_STATE, kernel='poly'),
+            'LR': LogisticRegression(random_state=RANDOM_STATE),
+            'NB': GaussianNB(),
+            'R-MLP': MLPClassifier(random_state=RANDOM_STATE),
+            'L-MLP': MLPClassifier(random_state=RANDOM_STATE, activation='identity')
         }
 
         classifier = classifiers[classifier_name]
@@ -64,12 +64,12 @@ def evaluate_trial(classifier_name, fold, energy):
         predictions = clf.predict(X_test)
 
         scoring_functions = {
-            'precision': metrics.precision,
-            'recall': metrics.recall,
-            'specificity': metrics.specificity,
-            'auc': metrics.auc,
-            'g-mean': metrics.g_mean,
-            'f-measure': metrics.f_measure
+            'Precision': metrics.precision,
+            'Recall': metrics.recall,
+            'Specificity': metrics.specificity,
+            'AUC': metrics.auc,
+            'G-mean': metrics.g_mean,
+            'F-measure': metrics.f_measure
         }
 
         rows = []
