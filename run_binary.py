@@ -23,7 +23,7 @@ def evaluate_trial(classifier_name, fold):
     for dataset_name in datasets.names():
         for resampler_name in ['none', 'smote', 'bord', 'ncl', 'smote+tl', 'smote+enn',
                                'ccr', 'rb-ccr-h', 'rb-ccr-e', 'rb-ccr-l', 'rb-ccr-cv']:
-            RESULTS_PATH = Path(__file__).parents[0] / 'results_final'
+            RESULTS_PATH = Path(__file__).parents[0] / 'results_binary'
             RANDOM_STATE = 42
 
             trial_name = f'{dataset_name}_{fold}_{classifier_name}_{resampler_name}'
