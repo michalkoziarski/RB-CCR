@@ -1,5 +1,4 @@
 https://sci2s.ugr.es/keel/dataset/data/imbalanced/autos.zip
-https://sci2s.ugr.es/keel/dataset/data/imbalanced/balance.zip
 https://sci2s.ugr.es/keel/dataset/data/imbalanced/contraceptive.zip
 https://sci2s.ugr.es/keel/dataset/data/imbalanced/dermatology.zip
 https://sci2s.ugr.es/keel/dataset/data/imbalanced/ecoli.zip
