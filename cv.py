@@ -1,12 +1,12 @@
 import numpy as np
 
 from itertools import product
-from metrics import f_measure, g_mean, auc
+from metrics import auc
 from sklearn.model_selection import StratifiedKFold
 
 
 class ResamplingCV:
-    def __init__(self, algorithm, classifier, metrics=(f_measure, g_mean, auc), n=3, seed=None, **kwargs):
+    def __init__(self, algorithm, classifier, metrics=(auc,), n=3, seed=None, **kwargs):
         self.algorithm = algorithm
         self.classifier = classifier
         self.metrics = metrics

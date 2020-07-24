@@ -85,27 +85,23 @@ def evaluate_trial(classifier_name, fold):
                 ),
                 'CCR': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=[None], metrics=(metrics.auc,)
+                    random_state=[RANDOM_STATE], gamma=[None]
                 ),
                 'RB-CCR-H': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
-                    regions=['H']
+                    random_state=[RANDOM_STATE], gamma=gammas, regions=['H']
                 ),
                 'RB-CCR-E': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
-                    regions=['E']
+                    random_state=[RANDOM_STATE], gamma=gammas, regions=['E']
                 ),
                 'RB-CCR-L': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
-                    regions=['L']
+                    random_state=[RANDOM_STATE], gamma=gammas, regions=['L']
                 ),
                 'RB-CCR-CV': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
-                    random_state=[RANDOM_STATE], gamma=gammas, metrics=(metrics.auc,),
-                    regions=['L', 'E', 'H']
+                    random_state=[RANDOM_STATE], gamma=gammas, regions=['L', 'E', 'H']
                 )
             }
 
