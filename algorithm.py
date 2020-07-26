@@ -122,29 +122,13 @@ class RBCCR:
 
         appended = []
 
-        sample_ratios = np.array([1.0 / (radii[i] * np.sum(1.0 / radii)) for i in range(len(minority_points))])
-        n_synthetic_samples = np.round(sample_ratios * n).astype(np.int64)
-
-        if np.sum(n_synthetic_samples) < n:
-            for i in np.argsort(sample_ratios)[::-1]:
-                n_synthetic_samples[i] += 1
-
-                if np.sum(n_synthetic_samples) >= n:
-                    break
-        elif np.sum(n_synthetic_samples) > n:
-            for i in np.argsort(sample_ratios):
-                if n_synthetic_samples[i] > 0:
-                    n_synthetic_samples[i] -= 1
-
-                if np.sum(n_synthetic_samples) <= n:
-                    break
-
         for i in range(len(minority_points)):
             minority_point = minority_points[i]
+            n_synthetic_samples = int(np.round(1.0 / (radii[i] * np.sum(1.0 / radii)) * n))
             r = radii[i]
 
             if self.gamma is None or ('L' in self.regions and 'E' in self.regions and 'H' in self.regions):
-                for _ in range(n_synthetic_samples[i]):
+                for _ in range(n_synthetic_samples):
                     appended.append(minority_point + sample_inside_sphere(len(minority_point), r, self.p_norm))
             else:
                 samples = []
@@ -177,13 +161,13 @@ class RBCCR:
 
                 suitable_samples = np.array(suitable_samples)
 
-                if n_synthetic_samples[i] <= len(suitable_samples):
+                if n_synthetic_samples <= len(suitable_samples):
                     replace = False
                 else:
                     replace = True
 
                 selected_samples = suitable_samples[
-                    np.random.choice(len(suitable_samples), n_synthetic_samples[i], replace=replace)
+                    np.random.choice(len(suitable_samples), n_synthetic_samples, replace=replace)
                 ]
 
                 for sample in selected_samples:
