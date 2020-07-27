@@ -1,6 +1,5 @@
 import numpy as np
 
-from collections import Counter
 from itertools import product
 from metrics import auc
 from sklearn.model_selection import StratifiedKFold
@@ -16,15 +15,6 @@ class ResamplingCV:
         self.kwargs = kwargs
 
     def fit_sample(self, X, y):
-        X_ = X.copy()
-        y_ = y.copy()
-
-        singular_labels = [k for k, v in Counter(y).items() if v == 1]
-
-        for label in singular_labels:
-            X_ = X_[y_ != label]
-            y_ = y_[y_ != label]
-
         best_score = -np.inf
         best_parameters = None
 
@@ -39,9 +29,9 @@ class ResamplingCV:
             for i in range(self.n):
                 skf = StratifiedKFold(n_splits=2, shuffle=True, random_state=self.seed + i)
 
-                for train_idx, test_idx in skf.split(X_, y_):
+                for train_idx, test_idx in skf.split(X, y):
                     try:
-                        X_train, y_train = self.algorithm(**parameters).fit_sample(X_[train_idx], y_[train_idx])
+                        X_train, y_train = self.algorithm(**parameters).fit_sample(X[train_idx], y[train_idx])
                     except (ValueError, RuntimeError) as e:
                         scores.append(-np.inf)
 
@@ -53,9 +43,9 @@ class ResamplingCV:
                             break
 
                         classifier = self.classifier.fit(X_train, y_train)
-                        predictions = classifier.predict(X_[test_idx])
+                        predictions = classifier.predict(X[test_idx])
 
-                        scores.append(np.mean([metric(y_[test_idx], predictions) for metric in self.metrics]))
+                        scores.append(np.mean([metric(y[test_idx], predictions) for metric in self.metrics]))
 
             score = np.mean(scores)
 
