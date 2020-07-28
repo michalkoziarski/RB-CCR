@@ -22,7 +22,7 @@ from sklearn.tree import DecisionTreeClassifier
 def evaluate_trial(classifier_name, fold):
     for dataset_name in datasets.names():
         for resampler_name in ['None', 'SMOTE', 'Bord', 'NCL', 'SMOTE+TL', 'SMOTE+EN', 'CCR',
-                               'RB-CCR-H', 'RB-CCR-E', 'RB-CCR-L', 'RB-CCR-CV', 'RB-CCR-CV2']:
+                               'RB-CCR-H', 'RB-CCR-E', 'RB-CCR-L', 'RB-CCR-CV', 'RB-CCR-CV2', 'RB-CCR-CV3']:
             RESULTS_PATH = Path(__file__).parents[0] / 'results_binary'
             RANDOM_STATE = 42
 
