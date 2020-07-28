@@ -106,6 +106,10 @@ def evaluate_trial(classifier_name, fold):
                 'RB-CCR-CV2': ResamplingCV(
                     RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
                     random_state=[RANDOM_STATE], gamma=gammas, regions=['L', 'E', 'H', 'LEH']
+                ),
+                'RB-CCR-CV3': ResamplingCV(
+                    RBCCR, classifier, seed=RANDOM_STATE, energy=energies,
+                    random_state=[RANDOM_STATE], gamma=gammas, regions=['L', 'LEH']
                 )
             }
 
