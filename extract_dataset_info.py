@@ -28,6 +28,7 @@ if __name__ == '__main__':
         rows.append([name.replace('_', '').replace('-', ''), imbalance_ratio, n_samples, n_features])
 
     df = pd.DataFrame(rows, columns=columns).sort_values('IR')
+    df['IR'] = df['IR'].map(lambda x: f'{x:.2f}')
 
     for i in range(30):
         row = [str(df.iloc[i][c]) for c in columns]
