@@ -51,7 +51,7 @@ def evaluate_trial(classifier_name, fold, energy):
 
         resampler = ResamplingCV(
             RBCCR, classifier, seed=RANDOM_STATE, energy=[energy],
-            random_state=[RANDOM_STATE], gamma=gammas, regions=['L', 'E', 'H']
+            random_state=[RANDOM_STATE], gamma=gammas, regions=['L', 'E', 'H', 'LEH']
         )
 
         assert len(np.unique(y_train)) == len(np.unique(y_test)) == 2
