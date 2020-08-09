@@ -122,34 +122,28 @@ def load(name, url=None, encode_features=True, remove_metadata=True, scale=True)
     return folds
 
 
-def urls(multiclass=False):
+def urls():
     result = []
 
-    if multiclass:
-        file_name = 'urls_multiclass.txt'
-    else:
-        file_name = 'urls_binary.txt'
-
-    with open(os.path.join(os.path.dirname(__file__), file_name)) as file:
+    with open(os.path.join(os.path.dirname(__file__), 'urls.txt')) as file:
         for line in file.readlines():
             result.append(line.rstrip())
 
     return result
 
 
-def names(multiclass=False):
-    return [url.split('/')[-1].replace('.zip', '') for url in urls(multiclass)]
+def names():
+    return [url.split('/')[-1].replace('.zip', '') for url in urls()]
 
 
-def load_all(multiclass=False):
+def load_all():
     datasets = {}
 
-    for url, name in zip(urls(multiclass), names(multiclass)):
+    for url, name in zip(urls(), names()):
         datasets[name] = load(name, url)
 
     return datasets
 
 
 if __name__ == '__main__':
-    for mc in [False, True]:
-        load_all(multiclass=mc)
+    load_all()
