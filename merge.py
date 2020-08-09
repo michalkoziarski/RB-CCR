@@ -4,7 +4,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-OUTPUT_DIRECTORY = Path('results')
+OUTPUT_DIRECTORY = Path(__file__).parent / 'results'
 
 
 if __name__ == '__main__':
