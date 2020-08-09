@@ -30,7 +30,8 @@ def rbf_score(point, minority_points, gamma, p_norm=2):
 
 class RBCCR:
     def __init__(self, energy, gamma=1.0, n_samples=100, threshold=0.33,
-                 regions='E', p_norm=2, minority_class=None, n=None, random_state=None):
+                 regions='E', p_norm=2, minority_class=None, n=None,
+                 random_state=None, keep_appended=False, keep_radii=False):
         self.energy = energy
         self.gamma = gamma
         self.n_samples = n_samples
@@ -40,6 +41,11 @@ class RBCCR:
         self.minority_class = minority_class
         self.n = n
         self.random_state = random_state
+        self.keep_appended = keep_appended
+        self.keep_radii = keep_radii
+
+        self.appended = None
+        self.radii = None
 
     def fit_sample(self, X, y):
         np.random.seed(self.random_state)
@@ -120,6 +126,9 @@ class RBCCR:
                 translation = (radius - d) / d * (majority_point - minority_point)
                 translations[sorted_distances[j]] += translation
 
+        if self.keep_radii:
+            self.radii = radii
+
         appended = []
 
         for i in range(len(minority_points)):
@@ -172,6 +181,11 @@ class RBCCR:
 
                 for sample in selected_samples:
                     appended.append(sample)
+
+        appended = np.array(appended)
+
+        if self.keep_appended:
+            self.appended = appended
 
         majority_points += translations
 
