@@ -1,4 +1,4 @@
-from visualize_regions_sphere import *
+from visualization_tools import *
 
 
 if __name__ == '__main__':
