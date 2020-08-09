@@ -4,11 +4,11 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-OUTPUT_DIRECTORY = Path(__file__).parent / 'results'
+RESULTS_PATH = Path(__file__).parent / 'results'
 
 
 if __name__ == '__main__':
-    OUTPUT_DIRECTORY.mkdir(exist_ok=True, parents=True)
+    RESULTS_PATH.mkdir(exist_ok=True, parents=True)
 
     for trial in ['preliminary_energy', 'final']:
         input_directory = Path(f'results_{trial}')
@@ -20,4 +20,4 @@ if __name__ == '__main__':
             dfs.append(df)
 
         df = pd.concat(dfs)
-        df.to_csv(OUTPUT_DIRECTORY / f'results_{trial}.csv', index=False)
+        df.to_csv(RESULTS_PATH / f'results_{trial}.csv', index=False)
