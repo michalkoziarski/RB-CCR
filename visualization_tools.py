@@ -8,7 +8,7 @@ from imblearn.under_sampling import RandomUnderSampler
 from matplotlib.patches import Polygon
 from scipy.spatial import ConvexHull
 from sklearn.manifold import TSNE
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from visualize_preliminary_energy import VISUALIZATIONS_PATH
 
 
@@ -184,7 +184,7 @@ def visualize(X, y, appended=None, gamma=None, radii=None,
         plt.show()
 
 
-def prepare_data(dataset_name, n_minority_samples=20):
+def prepare_data(dataset_name, n_minority_samples=20, scaler='MinMax'):
     dataset = datasets.load(dataset_name)
     (X_train, y_train), (X_test, y_test) = dataset[0][0], dataset[0][1]
     X, y = np.concatenate([X_train, X_test]), np.concatenate([y_train, y_test])
@@ -204,6 +204,12 @@ def prepare_data(dataset_name, n_minority_samples=20):
     ).fit_sample(X, y)
 
     X = TSNE(n_components=2, random_state=42).fit_transform(X)
-    X = MinMaxScaler().fit_transform(X)
+
+    if scaler == 'MinMax':
+        X = MinMaxScaler().fit_transform(X)
+    elif scaler == 'Standard':
+        X = StandardScaler().fit_transform(X)
+    else:
+        raise NotImplementedError
 
     return X, y
