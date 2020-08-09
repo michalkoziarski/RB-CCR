@@ -184,11 +184,7 @@ def visualize(X, y, appended=None, gamma=None, radii=None,
         plt.show()
 
 
-if __name__ == '__main__':
-    energy = 1.2
-    gamma = 0.3
-    dataset_name = 'vehicle3'
-
+def prepare_data(dataset_name, n_minority_samples=20):
     dataset = datasets.load(dataset_name)
     (X_train, y_train), (X_test, y_test) = dataset[0][0], dataset[0][1]
     X, y = np.concatenate([X_train, X_test]), np.concatenate([y_train, y_test])
@@ -201,7 +197,7 @@ if __name__ == '__main__':
 
     X, y = RandomUnderSampler(
         sampling_strategy={
-            minority_class: np.min([n_minority, 20]),
+            minority_class: np.min([n_minority, n_minority_samples]),
             majority_class: n_majority
         },
         random_state=42,
@@ -210,6 +206,16 @@ if __name__ == '__main__':
     X = TSNE(n_components=2, random_state=42).fit_transform(X)
     X = MinMaxScaler().fit_transform(X)
 
+    return X, y
+
+
+if __name__ == '__main__':
+    energy = 1.2
+    gamma = 0.3
+    dataset_name = 'vehicle3'
+
+    X, y = prepare_data(dataset_name)
+
     rbccr = RBCCR(
         energy=energy, p_norm=2, regions='LEH',
         gamma=gamma, random_state=42,
@@ -217,6 +223,7 @@ if __name__ == '__main__':
     )
     rbccr.fit_sample(X, y)
 
+    minority_class = Counter(y).most_common()[1][0]
     minority_points = X[y == minority_class]
 
     visualize(
