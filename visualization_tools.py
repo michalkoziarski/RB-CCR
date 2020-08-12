@@ -33,7 +33,7 @@ REGIONS_THRESHOLD = 0.33
 
 def visualize(X, y, appended=None, gamma=None, radii=None,
               regions_center=None, regions_radius=None,
-              p_norm=2, file_name=None):
+              p_norm=2, file_name=None, lim=None):
     assert len(np.unique(y)) == 2
     assert X.shape[1] == 2
 
@@ -61,19 +61,23 @@ def visualize(X, y, appended=None, gamma=None, radii=None,
     ax.tick_params(colors=BORDER_COLOR)
     ax.set_facecolor(BACKGROUND_COLOR)
 
-    x_limits = [np.min(X[:, 0]), np.max(X[:, 0])]
-    y_limits = [np.min(X[:, 1]), np.max(X[:, 1])]
+    if lim is None:
+        x_limits = [np.min(X[:, 0]), np.max(X[:, 0])]
+        y_limits = [np.min(X[:, 1]), np.max(X[:, 1])]
 
-    x_spread = np.abs(x_limits[1] - x_limits[0])
-    y_spread = np.abs(y_limits[1] - y_limits[0])
+        x_spread = np.abs(x_limits[1] - x_limits[0])
+        y_spread = np.abs(y_limits[1] - y_limits[0])
 
-    x_limits[0] = x_limits[0] - MARGIN * x_spread
-    y_limits[0] = y_limits[0] - MARGIN * y_spread
-    x_limits[1] = x_limits[1] + MARGIN * x_spread
-    y_limits[1] = y_limits[1] + MARGIN * y_spread
+        x_limits[0] = x_limits[0] - MARGIN * x_spread
+        y_limits[0] = y_limits[0] - MARGIN * y_spread
+        x_limits[1] = x_limits[1] + MARGIN * x_spread
+        y_limits[1] = y_limits[1] + MARGIN * y_spread
 
-    plt.xlim(x_limits)
-    plt.ylim(y_limits)
+        plt.xlim(x_limits)
+        plt.ylim(y_limits)
+    else:
+        plt.xlim(lim)
+        plt.ylim(lim)
 
     if regions_center is not None and regions_radius is not None and gamma is not None:
         seed_score = rbf_score(regions_center, minority_points, gamma, p_norm)
