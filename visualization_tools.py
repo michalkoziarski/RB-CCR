@@ -2,7 +2,7 @@ import datasets
 import matplotlib.pyplot as plt
 import numpy as np
 
-from algorithm import distance, RBCCR, rbf_score
+from algorithm import distance, rbf_score
 from collections import Counter
 from imblearn.under_sampling import RandomUnderSampler
 from matplotlib.patches import Polygon
@@ -61,18 +61,18 @@ def visualize(X, y, appended=None, gamma=None, radii=None,
     ax.tick_params(colors=BORDER_COLOR)
     ax.set_facecolor(BACKGROUND_COLOR)
 
+    x_limits = [np.min(X[:, 0]), np.max(X[:, 0])]
+    y_limits = [np.min(X[:, 1]), np.max(X[:, 1])]
+
+    x_spread = np.abs(x_limits[1] - x_limits[0])
+    y_spread = np.abs(y_limits[1] - y_limits[0])
+
+    x_limits[0] = x_limits[0] - MARGIN * x_spread
+    y_limits[0] = y_limits[0] - MARGIN * y_spread
+    x_limits[1] = x_limits[1] + MARGIN * x_spread
+    y_limits[1] = y_limits[1] + MARGIN * y_spread
+
     if lim is None:
-        x_limits = [np.min(X[:, 0]), np.max(X[:, 0])]
-        y_limits = [np.min(X[:, 1]), np.max(X[:, 1])]
-
-        x_spread = np.abs(x_limits[1] - x_limits[0])
-        y_spread = np.abs(y_limits[1] - y_limits[0])
-
-        x_limits[0] = x_limits[0] - MARGIN * x_spread
-        y_limits[0] = y_limits[0] - MARGIN * y_spread
-        x_limits[1] = x_limits[1] + MARGIN * x_spread
-        y_limits[1] = y_limits[1] + MARGIN * y_spread
-
         plt.xlim(x_limits)
         plt.ylim(y_limits)
     else:

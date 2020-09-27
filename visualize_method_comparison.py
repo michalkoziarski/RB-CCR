@@ -1,21 +1,24 @@
-from imblearn.over_sampling import SMOTE, BorderlineSMOTE
+from algorithm import RBCCR
+from imblearn.over_sampling import BorderlineSMOTE, SMOTE
+from rbo import RBO
 from visualization_tools import *
 
 
 if __name__ == '__main__':
     dataset_name = 'vehicle3'
-    energy = 0.5
-    gamma = 0.25
-    regions = 'E'
+    energy = 0.25
+    gamma = 0.1
 
     methods = {
         'none': None,
-        'smote': SMOTE(),
-        'bord': BorderlineSMOTE(),
-        'rb-ccr': RBCCR(energy=energy, gamma=gamma, regions=regions)
+        'smote': SMOTE(random_state=42),
+        'bord': BorderlineSMOTE(random_state=42),
+        'rbo': RBO(gamma=gamma, n_steps=100, random_state=42),
+        'ccr': RBCCR(energy=energy, gamma=gamma, regions='LEH', random_state=42),
+        'rb-ccr': RBCCR(energy=energy, gamma=gamma, regions='E', random_state=42)
     }
 
-    X, y = prepare_data(dataset_name, n_minority_samples=10)
+    X, y = prepare_data(dataset_name, n_minority_samples=25)
 
     for method_name, method in methods.items():
         if method is not None:
